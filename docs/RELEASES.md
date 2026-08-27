@@ -2,6 +2,8 @@
 
 This file records published artifacts and the engineering meaning of each release. GitHub Release is the source for the actual downloadable binary; this document is the project index.
 
+For chronological engineering history, including unreleased significant updates, use `VERSION_JOURNAL.md`.
+
 ## v0.6-quality — current quality release
 
 Status: **published**.
@@ -49,6 +51,8 @@ Build validation:
 
 Still requires field validation on real DION audio for recognition quality.
 
+Journal entry: `VERSION_JOURNAL.md` -> `2026-08-27.03`.
+
 ## v0.5.1-safe — stability fallback
 
 Status: **published** and retained as a fallback.
@@ -71,6 +75,8 @@ Release page:
 https://github.com/Zios86/test/releases/tag/v0.5.1-safe
 ```
 
+Journal entry: `VERSION_JOURNAL.md` -> `2026-08-27.02`.
+
 ## Release policy
 
 For every future release:
@@ -78,7 +84,8 @@ For every future release:
 1. Tests and build checks must pass.
 2. Packaged EXE self-test must pass on Windows.
 3. Actual uploaded binary SHA-256 must be recorded here and in GitHub Release notes.
-4. `CHANGELOG.md` and `ROADMAP.md` must be updated in the same task.
-5. Field-tested claims and CI-only claims must be distinguished explicitly.
+4. A released entry must be appended to `VERSION_JOURNAL.md` with validation, limitations and rollback/fallback information.
+5. `CHANGELOG.md` and `ROADMAP.md` must be updated in the same task.
+6. Field-tested claims and CI-only claims must be distinguished explicitly.
 
 Do not overwrite historical facts about an old release to match a newer implementation.
