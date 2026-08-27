@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "whisper": {
+    "repository": "Systran/faster-whisper-small",
+    "revision": "536b0662742c02347bc0e980a01041f333bce120",
+    "license": "MIT"
+  },
+  "speaker_embedding": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx",
+    "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+    "license": "Apache-2.0 (WeSpeaker upstream)"
+  },
+  "speaker_segmentation": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2",
+    "sha256": "24615ee884c897d9d2ba09bb4d30da6bb1b15e685065962db5b02e76e4996488",
+    "license": "MIT (pyannote segmentation 3.0)"
+  }
+}
