@@ -32,4 +32,4 @@
 AI-specific files `AGENTS.md`, `CLAUDE.md` and `.claude/skills/*` are adapters/procedures, not duplicate knowledge bases.
 
 ## Current documentation baseline
-The canonical docs cover 0.7 Secretary Bot and the 0.7.1 Hardening release candidate. Published status and exact binary hashes must always be taken from `RELEASES.md`; Windows/DION field validation must not be inferred from CI success.
+The canonical docs describe the published **0.7.1 Hardening** release and its predecessor **0.7 Secretary Bot**. Exact artifact names, sizes and SHA-256 values must be taken from `RELEASES.md`. Windows/DION field validation must not be inferred from CI success; the remaining field-test scope is maintained in `exec-plans/CURRENT.md` and `ROADMAP.md`.
