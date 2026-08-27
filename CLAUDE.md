@@ -24,6 +24,8 @@ Keep this file short. Canonical facts live in `docs/`.
 - Diagnostics never contain meeting text/audio/tokens/invite secrets.
 
 ## Validation
-0.7.1 reconstructed-source baseline: **46 passing tests locally**. Portable publication additionally requires Windows CI + packaged self-test.
+Current published release: **v0.7.1 Hardening**.
+
+0.7.1 reconstructed-source baseline: **46 passing tests locally**. The published release also passed Windows PR CI, production CI, pinned-model verification, EXE build and packaged self-test. Corporate DION/mTLS/WASAPI field behavior remains unverified until an actual field test is recorded.
 
 Every significant change must update `docs/VERSION_JOURNAL.md` and affected docs in the same task. Do not claim corporate DION/WASAPI field validation until it has actually been performed.
