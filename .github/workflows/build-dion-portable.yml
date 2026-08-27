@@ -44,7 +44,7 @@ jobs:
         shell: pwsh
         run: |
           python dion-hotfix/apply_051.py src
-          python -m py_compile src/run.py src/app/*.py
+          python -m compileall -q src/app src/run.py
 
       - name: Install build dependencies and run tests
         working-directory: src
@@ -59,7 +59,6 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force bundled_models | Out-Null
-          # Keep the directory name expected by the source while bundling the smaller multilingual base model.
           python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-base', local_dir='bundled_models/faster-whisper-small')"
           Invoke-WebRequest -Uri "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx" -OutFile "bundled_models/wespeaker_en_voxceleb_resnet34.onnx"
           Get-ChildItem bundled_models -Recurse | Select-Object FullName,Length
