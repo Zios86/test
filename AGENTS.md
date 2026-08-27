@@ -20,7 +20,9 @@ Short entry point for AI coding agents. Canonical project knowledge lives in `do
 Do not scan encoded `part*` files for orientation. Use the project map.
 
 ## Current validation baseline
-Reconstructed 0.7.1 source: `46` automated tests passing locally. Portable releases must also pass Windows CI and packaged `--portable-selftest`.
+Published release: **v0.7.1 Hardening**.
+
+Reconstructed 0.7.1 source baseline: `46` automated tests passing locally. The published release additionally passed Windows PR CI, production CI, pinned-model validation, one-file EXE build and packaged `--portable-selftest`. Corporate DION/WASAPI field validation is still separate and unproven.
 
 ## Non-negotiable rules
 - Windows 10/11 x64 target.
