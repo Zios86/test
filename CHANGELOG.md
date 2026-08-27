@@ -22,12 +22,19 @@ All notable user-visible changes to DION Meeting Assistant are recorded here.
 - Pinned Whisper revision and speaker-model SHA-256 values.
 - Pinned GitHub Actions by immutable commit SHA.
 - PR builds do not publish releases.
-- Published releases are immutable; existing tag/assets are never overwritten.
+- Published version tags/assets are not overwritten; an existing version requires a version bump.
+- Published `v0.7.1` portable EXE after a green production Windows build and packaged self-test.
 
 ### Validation
 - Reconstructed source before PR: **46 automated tests passing locally**; compileall passed.
-- Windows CI/packaged self-test are required before publication.
+- PR Windows CI run `33126146077` passed tests, model checks, EXE build and packaged self-test.
+- Production Windows CI run `33126756679` passed tests, model checks, EXE build, packaged self-test and Release publication.
 - Corporate DION/mTLS/WASAPI field validation remains required.
+
+### Published artifact
+- `DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe`
+- Size: `627,528,485 bytes`
+- SHA-256: `90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239`
 
 ## 0.7 Secretary Bot — 2026-08-27
 - Added `DION -> Секретарь-бот` connect/status/disconnect flow.
