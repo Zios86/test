@@ -1,183 +1,55 @@
 # Speech recognition design
 
-## Scope
+## Current quality profile
+0.7.1 inherits the 0.6 Quality STT path:
+- bundled local `Systran/faster-whisper-small`;
+- Russian `language="ru"`;
+- beam search 5;
+- default 12-second audio chunks;
+- bounded previous-utterance context;
+- editable domain hotwords/terminology;
+- VAD tuned to preserve short Russian utterances;
+- neighboring compatible segments may be merged.
 
-This document describes the live Russian STT path: audio chunking, faster-whisper settings, terminology prompting, context and quality trade-offs.
+STT remains local/offline in portable releases.
 
-Primary logical module: `app/transcriber.py`.
+## Context and terminology
+Context history is bounded and separated by source where appropriate. Hotwords guide recognition; they are not forced post-replacements. Do not automatically persist arbitrary sensitive meeting phrases.
 
-Related modules: `app/audio.py`, `app/ui.py`, `app/models.py`, `app/health.py`.
+## Speaker handoffs in 0.7.1
+Normal transcription keeps word timestamps off to avoid unnecessary live cost.
 
-## Why 0.6 exists
+When **system-audio diarization is explicitly enabled**, faster-whisper requests word timestamps. Word ranges are aligned to the diarization timeline so one Whisper segment can be split when the acoustic speaker changes.
 
-Real 0.5.1 DION transcript testing showed frequent phonetic substitutions, broken technical vocabulary and low-quality short utterances. The portable `base` model was selected primarily for artifact size, not maximum recognition quality.
-
-0.6 changes priority: recognition quality is more important than keeping the EXE below chat-upload limits. GitHub Release can host the larger artifact.
-
-## Current Quality profile
-
-### Model
-
-Portable release bundles:
-
+Target:
 ```text
-Systran/faster-whisper-small
+Иван: Мы решили.
+Пётр: Хорошо, сделаю.
 ```
+instead of assigning both phrases to the dominant speaker of one long Whisper segment.
 
-The model is local in the packaged application; STT does not need a cloud API.
+If timestamps/timeline are unavailable, the system falls back to segment-level attribution rather than inventing a split.
 
-### Language
-
-Russian is explicitly requested:
-
-```text
-language = "ru"
-```
-
-### Decoding
-
-Current intended quality setting:
-
-```text
-beam_size = 5
-```
-
-Reason: evaluate multiple decoding candidates instead of accepting the first greedy path.
-
-### Audio chunk size
-
-Default:
-
-```text
-12 seconds
-```
-
-Reason: longer chunks provide more lexical context than 8-second chunks while still keeping live latency acceptable for the MVP architecture.
-
-Do not increase chunk size blindly. Larger chunks improve context but increase delay and make queue backlog more expensive.
-
-## Context across chunks
-
-Problem: independent chunk recognition loses sentence context at arbitrary chunk boundaries.
-
-0.6 uses a small history of recently recognized text and builds an `initial_prompt` for the next chunk.
-
-Logical methods:
-
-- `TranscriptionWorker._remember()`;
-- `TranscriptionWorker._initial_prompt()`.
-
-Constraints:
-
-- history must be bounded;
-- do not feed the entire meeting transcript back into every chunk;
-- keep local/system source context separate where appropriate;
-- do not allow a mistaken phrase to dominate unlimited future recognition.
-
-## Domain terminology / hotwords
-
-Logical method:
-
-```text
-TranscriptionWorker._normalize_hotwords()
-```
-
-The UI allows meeting-specific terms such as:
-
-- participant surnames;
-- DION;
-- Naumen;
-- Service Desk;
-- КСПД;
-- ALT Linux;
-- WMS;
-- project/system abbreviations.
-
-The terminology list is used as recognition guidance, not as blind post-replacement. A word in the dictionary must not force the model to output it when acoustics do not support it.
-
-Future adaptive dictionary work must be explicit/user-controlled; do not automatically persist arbitrary meeting phrases as trusted terms.
-
-## VAD
-
-Voice activity detection filters silence/noise but aggressive VAD can remove very short responses such as «да», «нет», names or clipped sentence endings.
-
-0.6 adjusts VAD parameters to be less destructive to short Russian speech.
-
-When changing VAD:
-
-- test short utterances;
-- test normal continuous speech;
-- monitor false speech from background sound;
-- monitor empty chunks and dropped meaningful fragments.
-
-## Segment merging
-
-Whisper can emit several adjacent tiny segments that are awkward as separate transcript entries.
-
-`_merge_candidates()` merges appropriate neighboring segments so the live transcript is closer to a natural utterance.
-
-Do not merge across:
-
-- clearly different sources;
-- large time gaps;
-- known speaker boundaries when diarization is enabled.
+## Overlap limitation
+Two simultaneous speakers are still mixed in the Windows loopback signal. Diarization can mark `[ПЕРЕБИВАНИЕ]` and overlapping identities, but Whisper does not receive clean per-user tracks. Independent text recovery would require separate DION media tracks or a dedicated speech-separation stage.
 
 ## Quality versus latency
+Priority: preserve speech -> lexical correctness -> stability -> safe speaker attribution -> reasonable latency -> artifact size.
 
-Current priority order:
+Diarization remains opt-in because speaker processing is still coordinated with chunk transcription. Future work should make speaker analysis asynchronous so slow diarization cannot extend the live STT queue.
 
-1. preserve meaningful speech;
-2. improve lexical correctness;
-3. keep UI/session stable;
-4. keep latency reasonable;
-5. minimize EXE size last.
+## Field-test taxonomy
+Track acoustic substitutions, domain/name distortions, chunk-boundary truncation, lost short utterances, hallucinations, Windows-audio contamination, overlap, wrong speaker attribution, unsplit speaker handoffs, and queue/backlog drops.
 
-Health metrics should reveal when the quality profile is too slow for a target PC.
-
-## Error taxonomy for field tests
-
-When comparing transcripts, classify errors rather than only saying «плохо распознаёт»:
-
-1. **Acoustic substitution** — wrong normal word.
-2. **Domain term** — product/name/abbreviation distorted.
-3. **Boundary truncation** — phrase starts/ends at chunk edge.
-4. **Short utterance lost** — VAD/segment issue.
-5. **Hallucinated filler** — text without clear speech basis.
-6. **Source contamination** — Windows notification/other application sound entered loopback.
-7. **Overlap** — two people speak simultaneously.
-8. **Speaker attribution** — text is correct but assigned to wrong speaker.
+Meaningful WER/CER requires the same reference audio plus a manually corrected transcript. Speaker quality additionally requires diarization error and false named-assignment measurements. Prefer `unknown` over a false real name.
 
 ## Tests
-
-Primary automated coverage:
-
-```text
-tests/test_transcriber_quality.py
-```
-
-The test suite checks Quality-profile logic such as terminology/context/merge behavior. Automated unit tests do not measure real WER without reference audio + human transcript.
-
-## How to measure improvement properly
-
-For a meaningful accuracy number, use the same audio with a manually corrected reference transcript and calculate WER/CER. Comparing two model outputs without ground truth is not sufficient.
-
-For privacy-sensitive corporate testing, keep reference audio/transcript local and sanitize any material committed to the repository.
-
-## Planned quality improvements
-
-See `../ROADMAP.md`.
-
-Likely next work:
-
-- persistent approved terminology lists;
-- low-confidence review markers;
-- optional session-end re-decode/final pass;
-- representative local WER benchmark with sanitized audio.
+`tests/test_transcriber_quality.py` covers deterministic context/merge/word-handoff behavior. Unit tests do not measure real acoustic WER on DION calls.
 
 ## Invariants
-
-- offline STT remains default;
-- terminology is guidance, not forced substitution;
-- context history remains bounded;
-- quality changes must be tested for queue/latency impact;
-- a faster/lighter profile must not silently replace the Quality release behavior.
+- offline STT default;
+- bounded context;
+- terminology is guidance;
+- word timestamp cost only when diarization needs it;
+- quality changes must be evaluated for queue/latency impact;
+- do not claim measured field improvement without reference evidence.

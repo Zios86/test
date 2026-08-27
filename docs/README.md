@@ -1,61 +1,35 @@
 # Project documentation index
 
-`docs/` — единая система истины по проекту DION Meeting Assistant.
+`docs/` is the canonical knowledge base for DION Meeting Assistant across humans, Claude, ChatGPT/Codex and other agents.
 
-Цель структуры: любой человек, Claude, ChatGPT, Codex или другой ИИ должен быстро получить нужный контекст без полного перечитывания репозитория.
+## Reading order
+1. `PROJECT_MAP.md` — locate the relevant component.
+2. `VERSION_JOURNAL.md` — check recent relevant changes.
+3. Read only the matching design doc.
+4. For code/build work, read `DEVELOPMENT.md`.
+5. Before finishing, check `DOCUMENTATION_POLICY.md`.
 
-## Как читать документацию
-
-Для новой задачи используйте progressive disclosure:
-
-1. `PROJECT_MAP.md` — найдите нужный модуль/файл.
-2. Прочитайте только профильный design doc.
-3. Для изменения кода используйте `DEVELOPMENT.md`.
-4. Посмотрите последние записи `VERSION_JOURNAL.md`, если задача продолжает недавнее изменение.
-5. Перед завершением проверьте `DOCUMENTATION_POLICY.md`.
-
-## Канонические документы
-
-| Документ | Назначение | Когда читать |
-|---|---|---|
-| `PROJECT_MAP.md` | Карта файлов, классов, функций и маршрутов изменения | Перед любой задачей |
-| `ARCHITECTURE.md` | Компоненты, потоки данных, границы ответственности | Архитектурные и интеграционные задачи |
-| `DEVELOPMENT.md` | Окружение, тесты, сборка, CI/CD | Любое изменение кода/сборки |
-| `DOCUMENTATION_POLICY.md` | Что обновлять после каждого вида изменения | Перед завершением задачи |
-| `VERSION_JOURNAL.md` | Хронологический инженерный журнал версий и значимых обновлений | Продолжение работ, аудит истории, регрессии, релизы |
-| `AI_HANDOFF.md` | Как передавать работу между Claude/ChatGPT/Codex | При смене ИИ/чата |
-| `ROADMAP.md` | Текущее состояние и следующие шаги | Планирование |
-| `RELEASES.md` | Реально опубликованные версии и артефакты | Релизы/регрессии |
-
-## История проекта: что где искать
-
-- `/CHANGELOG.md` — кратко, что изменилось для пользователя.
-- `VERSION_JOURNAL.md` — подробная хронология значимых технических и продуктовых изменений, в том числе ещё не выпущенных.
-- `RELEASES.md` — только реально опубликованные GitHub Release и бинарники.
-- `ROADMAP.md` — куда проект идёт дальше.
+## Canonical documents
+- `PROJECT_MAP.md` — file/class/function routing.
+- `ARCHITECTURE.md` — runtime flow and failure boundaries.
+- `DEVELOPMENT.md` — environment, tests, dependency/model pins, CI/release.
+- `DOCUMENTATION_POLICY.md` — mandatory update matrix.
+- `VERSION_JOURNAL.md` — append-only engineering history.
+- `AI_HANDOFF.md` — cross-AI handoff.
+- `ROADMAP.md` — current direction/future work.
+- `RELEASES.md` — actually published binaries and hashes.
 
 ## Design docs
+- `design-docs/SPEECH_RECOGNITION.md` — Whisper/VAD/context/word timestamps.
+- `design-docs/AUDIO_STABILITY.md` — WASAPI/PortAudio/startup safety.
+- `design-docs/SPEAKER_IDENTIFICATION.md` — diarization, Voice ID, overlap, confidence.
+- `design-docs/DION_INTEGRATION.md` — IAPI, mTLS, Secretary Bot control plane.
+- `design-docs/PRIVACY_SECURITY.md` — local data, credentials, voice profiles, diagnostics.
 
-- `design-docs/SPEECH_RECOGNITION.md` — Whisper, chunks, контекст, hotwords, VAD, качество.
-- `design-docs/AUDIO_STABILITY.md` — WASAPI Loopback, микрофон, PortAudio, безопасный старт.
-- `design-docs/PRIVACY_SECURITY.md` — offline-first, хранение, диагностика, ограничения локального AI.
+## Execution plan
+`exec-plans/CURRENT.md` is the single current plan; durable history belongs in `VERSION_JOURNAL.md`.
 
-## Execution plans
+AI-specific files `AGENTS.md`, `CLAUDE.md` and `.claude/skills/*` are adapters/procedures, not duplicate knowledge bases.
 
-- `exec-plans/CURRENT.md` — единственный актуальный план текущего этапа.
-
-Когда большой этап завершён, его результат переносится в `ROADMAP.md`/`RELEASES.md`, а `CURRENT.md` переписывается под следующий этап. Не храните в нём бесконечный дневник — история изменений хранится в `VERSION_JOURNAL.md`.
-
-## AI-specific files
-
-Эти файлы **не являются отдельными базами знаний**:
-
-- `/AGENTS.md` — короткий указатель/правила для OpenAI Codex и других агентов, которые читают AGENTS.md;
-- `/CLAUDE.md` — короткая память проекта для Claude Code;
-- `/.claude/skills/*/SKILL.md` — процедурные навыки Claude с узкой областью применения.
-
-Если факт уже есть в `docs/`, не копируйте его подробно в AI-specific файл. Ссылайтесь на канонический документ.
-
-## Состояние документации
-
-Документация приведена к единой структуре для версии **0.6 Quality**. Любое последующее значимое изменение проекта должно сопровождаться новой записью в `VERSION_JOURNAL.md` и обновлением остальных затронутых документов в той же задаче.
+## Current documentation baseline
+The canonical docs cover 0.7 Secretary Bot and the 0.7.1 Hardening release candidate. Published status and exact binary hashes must always be taken from `RELEASES.md`; Windows/DION field validation must not be inferred from CI success.

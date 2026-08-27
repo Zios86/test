@@ -1,83 +1,46 @@
 # AGENTS.md
 
 ## Purpose
-
-This file is the short entry point for AI coding agents. Do not turn it into a project encyclopedia. The canonical knowledge base lives in `docs/`.
+Short entry point for AI coding agents. Canonical project knowledge lives in `docs/`.
 
 ## Start every task
-
 1. Read `docs/PROJECT_MAP.md`.
-2. If continuing recent work or investigating a regression, read the latest relevant entries in `docs/VERSION_JOURNAL.md`.
-3. Read only the design/development document relevant to the requested change.
-4. Inspect only the mapped source files before editing.
-5. Treat chat history as secondary; repository documentation is the source of truth.
+2. Read recent relevant `docs/VERSION_JOURNAL.md` entries.
+3. Read only the relevant design/development document.
+4. Inspect only mapped source/build files.
+5. Treat chat history as secondary to repository documentation.
 
-## Repository shape
+## Release/build branch
+`dion-exe-build` reconstructs the base source and applies, in order:
+- `dion-hotfix/apply_051.py` — shared-PortAudio stability;
+- `dion-quality/apply_060.py` — recognition quality;
+- `dion-secretary-bot/apply_070.py` — DION roster/Secretary Bot + isolated speaker fallback;
+- `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/speaker-attribution/release hardening.
 
-This branch is a release/build branch, not a normal unpacked source tree.
+Do not scan encoded `part*` files for orientation. Use the project map.
 
-- `dion-portable/` = encoded base project archive parts.
-- `dion-hotfix/apply_051.py` = 0.5.1 stability patch.
-- `dion-quality/apply_060.py` = 0.6 recognition-quality patch.
-- `.github/workflows/build-dion-portable.yml` = Windows build/release pipeline.
-- `docs/PROJECT_MAP.md` = logical map of the reconstructed application.
+## Current validation baseline
+Reconstructed 0.7.1 source: `46` automated tests passing locally. Portable releases must also pass Windows CI and packaged `--portable-selftest`.
 
-Do not scan every `dion-portable/part*` file to understand the code. Use the project map and reconstruct only when code changes require it.
-
-## Mandatory documentation rule
-
-Any project change is incomplete until the related documentation is updated according to `docs/DOCUMENTATION_POLICY.md`.
-
-At minimum:
-
-- every significant update -> append a new entry to `docs/VERSION_JOURNAL.md`;
-- user-visible behavior -> `CHANGELOG.md`;
-- module responsibility, entry point or important symbol change -> `docs/PROJECT_MAP.md`;
-- runtime/data-flow change -> `docs/ARCHITECTURE.md` or relevant `docs/design-docs/*`;
-- build/test/dependency change -> `docs/DEVELOPMENT.md`;
-- release/status change -> `docs/RELEASES.md`, `docs/ROADMAP.md`, and `docs/VERSION_JOURNAL.md`;
-- new architectural choice -> record it in the appropriate design document and journal if significant.
-
-`VERSION_JOURNAL.md` is append-only history. Do not rewrite old entries to make them match current behavior; add a correcting entry instead.
-
-Do not duplicate detailed facts in both `AGENTS.md` and `CLAUDE.md`.
-
-## Validation
-
-For reconstructed source, run:
-
-```bash
-python -m pytest -q
-```
-
-Current 0.6 baseline: 25 passing tests.
-
-For portable releases, the Windows pipeline must also pass the packaged EXE `--portable-selftest` before publication.
-
-## Core constraints
-
-- Windows 10/11 x64 is the target platform.
-- Main transcription path is local/offline.
-- Do not introduce an external speech/cloud AI dependency without explicit approval.
-- Preserve the shared PortAudio context safety fix from 0.5.1.
-- Speaker diarization remains disabled by default until the native module is isolated safely.
-- Diagnostic/crash files must not contain transcript text or raw audio.
+## Non-negotiable rules
+- Windows 10/11 x64 target.
+- STT local/offline by default.
+- Preserve shared PortAudio context safety.
+- Diarization is opt-in until field performance is proven.
+- DION IAPI uses token + mTLS when required; credentials stay memory-only.
+- Never infer a participant name from roster alone.
+- Persistent voice profiles are opt-in; on Windows they are DPAPI-protected and must not persist name/e-mail.
+- Diagnostics/crash reports exclude transcript/audio/tokens/invite secrets.
+- Published releases are immutable: never replace an existing release asset/tag.
 
 ## Fast routing
-
-- Speech recognition quality -> `docs/design-docs/SPEECH_RECOGNITION.md`, logical `app/transcriber.py`.
-- Audio/WASAPI/startup crash -> `docs/design-docs/AUDIO_STABILITY.md`, logical `app/audio.py` and `app/ui.py`.
-- Protocol extraction -> `docs/ARCHITECTURE.md`, logical `app/protocol.py`.
-- Ollama/local AI -> logical `app/local_ai.py`.
-- Export/autosave -> logical `app/storage.py`.
-- Diagnostics -> logical `app/health.py`, `app/preflight.py`, `app/crash.py`.
-- Release build -> `docs/DEVELOPMENT.md`, `.github/workflows/build-dion-portable.yml`.
-- Version/update history -> `docs/VERSION_JOURNAL.md`.
+- Speech recognition: `docs/design-docs/SPEECH_RECOGNITION.md`, `app/transcriber.py`.
+- Speaker ID/overlap: `docs/design-docs/SPEAKER_IDENTIFICATION.md`, `app/speakers.py`, `app/speaker_profiles.py`.
+- DION/mTLS/Secretary Bot: `docs/design-docs/DION_INTEGRATION.md`, `app/dion_api.py`, `app/dion_bot.py`, `app/ui.py`.
+- Audio startup/WASAPI: `docs/design-docs/AUDIO_STABILITY.md`, `app/audio.py`.
+- Privacy: `docs/design-docs/PRIVACY_SECURITY.md`.
+- Release/build: `docs/DEVELOPMENT.md`, workflow, patch scripts, `release/model-manifest.json`.
+- Version history: `docs/VERSION_JOURNAL.md`.
 
 ## Before finishing
-
-- Run applicable tests/checks.
-- Add the required `docs/VERSION_JOURNAL.md` entry for significant work.
-- Update all other affected documentation in the same change.
-- Update `docs/exec-plans/CURRENT.md` if the change advances or changes active work.
-- State any untested Windows/DION-specific behavior explicitly.
+Run applicable tests, update `VERSION_JOURNAL.md` for significant work, and update every affected canonical document according to `docs/DOCUMENTATION_POLICY.md`. Do not claim corporate DION/WASAPI field validation unless it actually happened.

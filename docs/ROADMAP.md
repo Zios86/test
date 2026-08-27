@@ -1,97 +1,41 @@
 # Roadmap
 
-## Current stable direction
+## Current line
+**0.7.1 Hardening** — security/stability/release hardening of the 0.7 Secretary Bot architecture. Local source validation baseline: 46 tests. Windows CI + packaged self-test are required before marking it published.
 
-Current release line: **0.6 Quality**.
+## Completed foundation
+- **0.5.1 Safe:** shared PortAudio context and safer startup.
+- **0.6 Quality:** Whisper small, beam 5, context/hotwords, tuned VAD, 12-second chunks.
+- **0.7 Secretary Bot:** named DION invite, participant/session roster, visible guest browser, isolated local speaker fallback and overlap markers.
 
-Primary objective: reliable local Russian meeting transcription on Windows/DION before adding more intelligence around speakers and protocol generation.
+## 0.7.1 hardening goals
+Implemented in the release candidate:
+- mTLS certificate/key/password configurable in UI;
+- diarization opt-in by default;
+- Voice ID only against active DION participants;
+- DPAPI-protected persistent voice profiles without name/e-mail;
+- invite revoke on normal close and stale guest-profile cleanup;
+- word timestamps split Whisper text at speaker handoffs;
+- conservative Voice-ID thresholds;
+- locked dependencies and pinned model hashes/revisions;
+- immutable release assets/tags;
+- PR CI before release publication.
 
-## Completed
+## Next evidence: field hardening
+1. Corporate DION token + mTLS connection test.
+2. Secretary Bot room join/roster/revoke/waiting-room behavior.
+3. WASAPI + mic coexistence on target PCs.
+4. 2/5/10 participant tests with rapid speaker changes and overlap.
+5. 60+ minute latency/queue/drop measurement.
+6. Calibrate Voice ID false accepts/rejects and diarization error.
 
-### 0.5.1 Safe
+## Next engineering candidates
+- asynchronous speaker analysis so diarization cannot extend live STT queue latency;
+- PFX/P12 client-certificate support if corporate provisioning requires it;
+- direct DION active-speaker/per-user media only if DION documents/provides it;
+- approved terminology profiles and optional final-pass transcript refinement;
+- migrate encoded `part* + apply_*.py` build tree to a normal source tree;
+- Authenticode signing and corporate package format.
 
-- shared PortAudio context for system loopback + microphone;
-- safer native-audio startup;
-- diarization disabled by default;
-- portable Windows EXE self-test;
-- GitHub Release automation.
-
-### 0.6 Quality
-
-- bundled offline Whisper `small` instead of `base`;
-- beam search 5;
-- previous-utterance context between audio chunks;
-- editable terminology/hotwords field;
-- built-in support terminology;
-- VAD tuned to preserve short Russian utterances;
-- merging of neighboring short segments;
-- default chunk length increased to 12 seconds;
-- all 0.5.1 audio-safety changes preserved.
-
-## Next: 0.6.x quality hardening
-
-Priority order:
-
-1. **Field comparison on real DION meetings**
-   - collect new sanitized transcript JSON;
-   - compare recurring error categories against 0.5.1;
-   - identify terminology/acoustic errors versus chunk-boundary errors.
-
-2. **Adaptive terminology dictionary**
-   - persist approved user terms locally;
-   - allow import/export of terminology list;
-   - separate global terms from meeting-specific terms;
-   - never learn raw sensitive phrases automatically without user control.
-
-3. **Confidence/quality markers**
-   - expose low-confidence or suspicious fragments for review;
-   - avoid pretending uncertain text is reliable.
-
-4. **Session-end quality pass**
-   - optionally reprocess accumulated transcript/audio context after the meeting for a cleaner final transcript;
-   - keep live transcript fast enough for use during the call.
-
-## Later: safe speaker separation
-
-Current speaker embedding code exists but remains off by default.
-
-Before enabling by default:
-
-- isolate risky native diarization code from the main GUI/STT process where practical;
-- prove that diarization failure cannot terminate the transcription session;
-- test overlapping speech and speaker switching;
-- add manual speaker-name mapping as the authoritative naming mechanism.
-
-## Later: protocol quality
-
-After transcript quality is stable:
-
-- improve deterministic extraction using real sanitized examples;
-- add stronger provenance between protocol item and transcript timestamp;
-- improve review queue for ambiguous tasks/deadlines;
-- preserve "do not invent missing facts" invariant.
-
-## DION integration
-
-Possible future integration:
-
-- meeting metadata/participant list through documented DION APIs;
-- protocol delivery through DION chat bot/API where allowed;
-- do not assume DION API exposes a live raw audio/active-speaker stream unless documented and verified.
-
-## Documentation/engineering improvement
-
-The repository should eventually move from encoded `dion-portable/part*` + patch scripts to a normal unpacked source tree with ordinary commits/tags. This would reduce build complexity and make code review easier for humans and AI.
-
-Until that migration happens, `docs/PROJECT_MAP.md` is the authoritative navigation layer.
-
-## Definition of done for a roadmap item
-
-An item moves to Completed only when:
-
-- implementation exists;
-- relevant automated checks pass;
-- Windows/DION-specific limitations are stated;
-- affected documentation is updated;
-- user-visible behavior is in `CHANGELOG.md`;
-- release metadata is updated if published.
+## GitHub administration
+Repository privacy, default branch and branch protection are external settings. During the audit the repository was observed public; this must be manually corrected/verified before treating repository contents/releases as restricted.
