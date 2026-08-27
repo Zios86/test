@@ -15,27 +15,57 @@ This policy applies to humans, Claude, ChatGPT, Codex and any other agent workin
 
 If levels 1 and 2 disagree, fix the documentation before finishing the task.
 
+## Mandatory version/update journal
+
+`docs/VERSION_JOURNAL.md` is the append-only chronological engineering journal of the project.
+
+Every **significant** project change must add a new journal entry in the same task. This includes:
+
+- feature or bug fix;
+- quality/stability change;
+- architecture or data-flow change;
+- dependency/build/CI change;
+- security/privacy change;
+- documentation governance change;
+- release or rollback;
+- major refactor that changes how future work must be done.
+
+Do not silently rewrite historical entries. If a prior journal entry becomes incorrect, add a correcting entry that references the old one.
+
+Each entry should record, when applicable: ID/date, version or branch, type/status, purpose, changed components, implemented behavior, validation, known limitations/risks, release/artifact metadata, SHA-256 and rollback path.
+
 ## Mandatory update matrix
 
 | Change type | Required documentation |
 |---|---|
-| User-visible feature/fix | `CHANGELOG.md` |
-| File/module/class responsibility | `PROJECT_MAP.md` |
-| New entry point or key function | `PROJECT_MAP.md` |
-| Data flow/threading/runtime behavior | `ARCHITECTURE.md` and relevant design doc |
-| Audio/WASAPI/native stability | `design-docs/AUDIO_STABILITY.md` |
-| Whisper/VAD/context/dictionary/model | `design-docs/SPEECH_RECOGNITION.md` |
-| Privacy, network, storage, diagnostics | `design-docs/PRIVACY_SECURITY.md` |
-| Dependency/test/build/CI | `DEVELOPMENT.md` |
-| Published release or artifact | `RELEASES.md`, `ROADMAP.md`, `CHANGELOG.md` |
-| Planned work/priority changed | `ROADMAP.md`, `exec-plans/CURRENT.md` |
-| New recurring workflow | relevant `SKILL.md` or new Skill |
-| AI workflow/navigation rule | `AGENTS.md` and/or `CLAUDE.md`, but keep details canonical in `docs/` |
+| Any significant project update | `VERSION_JOURNAL.md` |
+| User-visible feature/fix | `CHANGELOG.md`, `VERSION_JOURNAL.md` |
+| File/module/class responsibility | `PROJECT_MAP.md`, `VERSION_JOURNAL.md` if significant |
+| New entry point or key function | `PROJECT_MAP.md`, `VERSION_JOURNAL.md` if significant |
+| Data flow/threading/runtime behavior | `ARCHITECTURE.md`, relevant design doc, `VERSION_JOURNAL.md` |
+| Audio/WASAPI/native stability | `design-docs/AUDIO_STABILITY.md`, `VERSION_JOURNAL.md` |
+| Whisper/VAD/context/dictionary/model | `design-docs/SPEECH_RECOGNITION.md`, `VERSION_JOURNAL.md` |
+| Privacy, network, storage, diagnostics | `design-docs/PRIVACY_SECURITY.md`, `VERSION_JOURNAL.md` |
+| Dependency/test/build/CI | `DEVELOPMENT.md`, `VERSION_JOURNAL.md` |
+| Published release or artifact | `RELEASES.md`, `ROADMAP.md`, `CHANGELOG.md`, `VERSION_JOURNAL.md` |
+| Planned work/priority changed | `ROADMAP.md`, `exec-plans/CURRENT.md`; journal if significant |
+| New recurring workflow | relevant `SKILL.md` or new Skill, plus journal if significant |
+| AI workflow/navigation rule | `AGENTS.md` and/or `CLAUDE.md`, but keep details canonical in `docs/`; journal required |
+
+## Difference between history files
+
+- `CHANGELOG.md` — concise user-visible changes by version.
+- `RELEASES.md` — actually published GitHub releases and artifact metadata.
+- `VERSION_JOURNAL.md` — chronological engineering ledger of significant updates, including unreleased work.
+- `ROADMAP.md` — current and future direction, not history.
+
+Do not use one file as a replacement for all four roles.
 
 ## Before editing
 
 - Read `PROJECT_MAP.md`.
 - Identify which documentation rows above will be affected.
+- Check the latest entries in `VERSION_JOURNAL.md` so the new entry uses the next ID and does not duplicate already recorded work.
 - Do not load unrelated docs/code into context.
 
 ## While editing
@@ -57,6 +87,7 @@ Do not document an intended behavior as implemented until code/tests/build suppo
 Use this checklist:
 
 - [ ] Tests/checks executed where possible.
+- [ ] A `VERSION_JOURNAL.md` entry was added for every significant update in this task.
 - [ ] `PROJECT_MAP.md` still points to the correct modules/functions.
 - [ ] Architecture/design docs describe the actual implementation.
 - [ ] `CHANGELOG.md` includes user-visible changes.
@@ -91,7 +122,7 @@ For `.claude/skills/<name>/SKILL.md`:
 
 ## Anti-drift rule for multiple AI systems
 
-Never maintain separate Claude and ChatGPT versions of architecture, roadmap or project map.
+Never maintain separate Claude and ChatGPT versions of architecture, roadmap, project map or version history.
 
 The shared model is:
 
@@ -115,4 +146,5 @@ Besides per-change updates, review the documentation structure at each release:
 - merge duplicates;
 - verify map paths;
 - ensure active plan matches roadmap;
-- ensure released version and SHA metadata are correct.
+- ensure released version and SHA metadata are correct;
+- verify `VERSION_JOURNAL.md` contains the release and the major updates since the previous release.
