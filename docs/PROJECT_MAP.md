@@ -6,6 +6,8 @@
 
 Если задача относится к приложению, сначала найдите её в таблице **«Куда идти за изменением»** ниже. Не сканируйте весь репозиторий и не читайте `dion-portable/part*` по одному.
 
+Если задача продолжает недавнее изменение, касается регрессии или версии — после карты откройте последние релевантные записи `VERSION_JOURNAL.md`.
+
 ## 2. Физическая структура release/build-ветки
 
 ```text
@@ -15,6 +17,17 @@
 ├── CLAUDE.md
 ├── CHANGELOG.md
 ├── docs/
+│   ├── README.md
+│   ├── PROJECT_MAP.md
+│   ├── ARCHITECTURE.md
+│   ├── DEVELOPMENT.md
+│   ├── DOCUMENTATION_POLICY.md
+│   ├── VERSION_JOURNAL.md
+│   ├── RELEASES.md
+│   ├── ROADMAP.md
+│   ├── AI_HANDOFF.md
+│   ├── design-docs/
+│   └── exec-plans/
 ├── .claude/skills/
 ├── .github/workflows/build-dion-portable.yml
 ├── dion-portable/
@@ -35,6 +48,7 @@
 - `dion-hotfix/apply_051.py` — накладывает изменения 0.5.1 Safe на восстановленный проект.
 - `dion-quality/apply_060.py` — накладывает изменения 0.6 Quality: Whisper small, beam 5, контекст, hotwords, VAD и UI словаря.
 - `.github/workflows/build-dion-portable.yml` — текущий production release pipeline ветки: восстановление -> патчи -> зависимости -> offline-модели -> PyInstaller onefile -> self-test -> GitHub Release.
+- `docs/VERSION_JOURNAL.md` — append-only инженерная история значимых изменений между версиями и релизами.
 
 ## 3. Логическая структура восстановленного приложения
 
@@ -248,9 +262,13 @@ tests/
 | Изменить DOCX/TXT/JSON | `ARCHITECTURE.md` | `app/storage.py`, `app/protocol.py` |
 | Изменить диагностику | `design-docs/PRIVACY_SECURITY.md` | `app/health.py`, `app/preflight.py`, `diagnostics.py` |
 | Добавить локальный AI | `design-docs/PRIVACY_SECURITY.md` | `app/local_ai.py`, `app/ui.py` |
-| Изменить EXE/Release | `DEVELOPMENT.md` | workflow + patch scripts |
-| Новая версия | `DEVELOPMENT.md`, `DOCUMENTATION_POLICY.md` | workflow, `CHANGELOG.md`, `RELEASES.md` |
+| Изменить EXE/Release | `DEVELOPMENT.md`, `VERSION_JOURNAL.md` | workflow + patch scripts |
+| Новая версия | `DEVELOPMENT.md`, `DOCUMENTATION_POLICY.md`, `VERSION_JOURNAL.md` | workflow, `CHANGELOG.md`, `RELEASES.md` |
+| Понять что и когда менялось | `VERSION_JOURNAL.md` | затем только связанные файлы из записи |
+| Найти опубликованный EXE/SHA | `RELEASES.md` | GitHub Release |
 
 ## 8. Правило поддержания карты
 
 Если файл, класс, ключевая функция или ответственность модуля изменилась — эта карта обновляется **в той же задаче**. Если карта расходится с кодом, задача считается незавершённой.
+
+Если добавлен новый канонический документ, который влияет на навигацию/историю проекта, он также должен быть отражён в этой карте.
