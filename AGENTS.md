@@ -7,9 +7,10 @@ This file is the short entry point for AI coding agents. Do not turn it into a p
 ## Start every task
 
 1. Read `docs/PROJECT_MAP.md`.
-2. Read only the design/development document relevant to the requested change.
-3. Inspect only the mapped source files before editing.
-4. Treat chat history as secondary; repository documentation is the source of truth.
+2. If continuing recent work or investigating a regression, read the latest relevant entries in `docs/VERSION_JOURNAL.md`.
+3. Read only the design/development document relevant to the requested change.
+4. Inspect only the mapped source files before editing.
+5. Treat chat history as secondary; repository documentation is the source of truth.
 
 ## Repository shape
 
@@ -29,12 +30,15 @@ Any project change is incomplete until the related documentation is updated acco
 
 At minimum:
 
+- every significant update -> append a new entry to `docs/VERSION_JOURNAL.md`;
 - user-visible behavior -> `CHANGELOG.md`;
 - module responsibility, entry point or important symbol change -> `docs/PROJECT_MAP.md`;
 - runtime/data-flow change -> `docs/ARCHITECTURE.md` or relevant `docs/design-docs/*`;
 - build/test/dependency change -> `docs/DEVELOPMENT.md`;
-- release/status change -> `docs/RELEASES.md` and `docs/ROADMAP.md`;
-- new architectural choice -> record it in the appropriate design document.
+- release/status change -> `docs/RELEASES.md`, `docs/ROADMAP.md`, and `docs/VERSION_JOURNAL.md`;
+- new architectural choice -> record it in the appropriate design document and journal if significant.
+
+`VERSION_JOURNAL.md` is append-only history. Do not rewrite old entries to make them match current behavior; add a correcting entry instead.
 
 Do not duplicate detailed facts in both `AGENTS.md` and `CLAUDE.md`.
 
@@ -68,10 +72,12 @@ For portable releases, the Windows pipeline must also pass the packaged EXE `--p
 - Export/autosave -> logical `app/storage.py`.
 - Diagnostics -> logical `app/health.py`, `app/preflight.py`, `app/crash.py`.
 - Release build -> `docs/DEVELOPMENT.md`, `.github/workflows/build-dion-portable.yml`.
+- Version/update history -> `docs/VERSION_JOURNAL.md`.
 
 ## Before finishing
 
 - Run applicable tests/checks.
-- Update documentation in the same change.
+- Add the required `docs/VERSION_JOURNAL.md` entry for significant work.
+- Update all other affected documentation in the same change.
 - Update `docs/exec-plans/CURRENT.md` if the change advances or changes active work.
 - State any untested Windows/DION-specific behavior explicitly.
