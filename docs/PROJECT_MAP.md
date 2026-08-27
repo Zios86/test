@@ -46,8 +46,10 @@ Patch order is 0.5.1 -> 0.6 -> 0.7 -> 0.7.1.
 - `app/local_ai.py` — optional localhost-only protocol wording refinement.
 - `app/health.py`, `app/preflight.py`, `app/crash.py` — health/preflight/redacted crash diagnostics.
 
-## Tests
-0.7.1 reconstructed-source baseline: **46 passed locally**. Windows CI and packaged self-test are additionally required for a release.
+## Tests and release gates
+0.7.1 reconstructed-source baseline: **46 passed locally**.
+
+Published `v0.7.1` additionally passed Windows CI, pinned-model validation, one-file EXE build and packaged `--portable-selftest` in both the PR build and the production release build. Field DION/WASAPI validation remains separate.
 
 Key suites: `test_transcriber_quality.py`, `test_dion_api.py`, `test_dion_bot.py`, `test_speaker_attribution.py`, `test_speaker_profiles.py`, plus storage/protocol/health/crash/local-AI coverage.
 
