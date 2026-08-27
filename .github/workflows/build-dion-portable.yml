@@ -1,0 +1,87 @@
+name: Build DION Portable EXE
+
+on:
+  push:
+    branches:
+      - dion-exe-build
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct source
+        shell: pwsh
+        run: |
+          $parts = @(
+            "dion-portable/part00",
+            "dion-portable/part01",
+            "dion-portable/part02_03",
+            "dion-portable/part04_05",
+            "dion-portable/part06_07",
+            "dion-portable/part08_09",
+            "dion-portable/part10_11",
+            "dion-portable/part12_13",
+            "dion-portable/part14"
+          )
+          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ""
+          [IO.File]::WriteAllBytes("source.zip", [Convert]::FromBase64String($b64))
+          $hash = (Get-FileHash "source.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne "48feb8875f9c94a160621eaefecc98d3246e8580c5db9c9efa347abe9b5f5ff1") {
+            throw "Source checksum mismatch: $hash"
+          }
+          New-Item -ItemType Directory -Force src | Out-Null
+          Expand-Archive source.zip src -Force
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        working-directory: src
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller huggingface_hub
+
+      - name: Download offline models
+        working-directory: src
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force bundled_models | Out-Null
+          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-small', local_dir='bundled_models/faster-whisper-small')"
+          Invoke-WebRequest -Uri "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx" -OutFile "bundled_models/wespeaker_en_voxceleb_resnet34.onnx"
+          Get-ChildItem bundled_models -Recurse | Select-Object FullName,Length
+
+      - name: Build single portable EXE
+        working-directory: src
+        shell: cmd
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.5_Portable" ^
+            --collect-all faster_whisper ^
+            --collect-all ctranslate2 ^
+            --collect-all av ^
+            --collect-all sherpa_onnx ^
+            --collect-all pyaudiowpatch ^
+            --add-data "bundled_models;bundled_models" ^
+            run.py
+
+      - name: Self-test packaged EXE
+        working-directory: src
+        shell: pwsh
+        run: |
+          $exe = ".\dist\DION_Meeting_Assistant_0.5_Portable.exe"
+          $p = Start-Process -FilePath $exe -ArgumentList "--portable-selftest" -PassThru -Wait
+          if ($p.ExitCode -ne 0) { throw "Portable self-test failed: $($p.ExitCode)" }
+          Get-FileHash $exe -Algorithm SHA256
+          Get-Item $exe | Select-Object Name,Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DION_Meeting_Assistant_0.5_Portable
+          path: src/dist/DION_Meeting_Assistant_0.5_Portable.exe
+          compression-level: 0
+          if-no-files-found: error
