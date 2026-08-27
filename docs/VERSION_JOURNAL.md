@@ -34,9 +34,164 @@
 
 ## Текущая версия
 
-**0.6 Quality** — текущий опубликованный профиль качества распознавания.
+**0.7.1 Hardening** — текущий опубликованный релиз.
 
-Резервная стабильная версия: **0.5.1 Safe**.
+Предыдущий релиз: **0.7 Secretary Bot**.
+
+Стабильные резервные точки для отката: **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+
+---
+
+## 2026-08-28.02 — v0.7.1 Hardening опубликован
+
+- Версия/ветка: `v0.7.1`, `dion-exe-build`
+- Тип: `security`, `fix`, `build`, `release`
+- Статус: `released`
+- Цель: закрыть найденные после аудита 0.7 риски DION/mTLS, Voice ID, хранения голосовых профилей, lifecycle Секретаря-бота и воспроизводимости релизной сборки.
+
+### Изменения
+
+- добавлена настройка DION mTLS client certificate + PEM key + optional key password;
+- diarization возвращена в opt-in состояние по умолчанию;
+- автоматический Voice ID ограничен текущими активными участниками DION;
+- persistent voice-profile payload больше не хранит имя/e-mail участника;
+- Windows persistence голосовых профилей защищена DPAPI;
+- на нормальном завершении приложение пытается аннулировать invite Секретаря-бота;
+- добавлена очистка устаревших временных guest-browser profiles;
+- при активной diarization Whisper использует word timestamps и может разделять текст на speaker handoff;
+- ужесточены cross-meeting Voice ID thresholds;
+- Windows CI dependencies зафиксированы lock-файлом;
+- Whisper revision и speaker-model inputs закреплены manifest/hash значениями;
+- GitHub Actions закреплены immutable commit SHA;
+- PR-build не публикует Release;
+- release workflow запрещает перезапись существующего тега `v0.7.1` и требует bump версии.
+
+### Изменённые компоненты
+
+- `dion-hardening/apply_071.py` и multipart payload;
+- `.github/workflows/build-dion-portable.yml`;
+- `release/model-manifest.json`;
+- логические модули `app/dion_api.py`, `app/dion_bot.py`, `app/speaker_profiles.py`, `app/speakers.py`, `app/transcriber.py`, `app/ui.py`, `app/health.py`;
+- тесты DION/Voice ID/transcriber;
+- canonical docs, включая DION и speaker-identification design docs.
+
+### Проверка
+
+PR Windows CI:
+
+```text
+run 33126146077 — success
+```
+
+В PR прошли:
+
+- применение цепочки патчей 0.5.1 -> 0.6 -> 0.7 -> 0.7.1;
+- locked dependency validation;
+- automated test suite;
+- pinned offline model verification;
+- PyInstaller one-file EXE build;
+- packaged `--portable-selftest`.
+
+Production Windows CI после merge:
+
+```text
+run 33126756679
+```
+
+Успешно прошли тесты, model verification, EXE build, packaged self-test и Release publication.
+
+### Release/артефакт
+
+Release:
+
+`https://github.com/Zios86/test/releases/tag/v0.7.1`
+
+Artifact:
+
+`DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe`
+
+Размер:
+
+`627,528,485 bytes`
+
+SHA-256:
+
+`90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239`
+
+Target commit:
+
+`a8f8a08d1f80f25fa6281ec16fe171e5ac788776`
+
+### Ограничения/риски
+
+CI/self-test не доказывают:
+
+- реальную авторизацию в корпоративном DION с production mTLS;
+- фактический join/revoke/waiting-room lifecycle Секретаря-бота;
+- длительную стабильность WASAPI + microphone на целевых АРМ;
+- качество определения спикеров при перекрывающейся речи;
+- фактическую WER/CER русской речи.
+
+Эти пункты остаются field-test pending.
+
+### Откат
+
+При регрессии DION/Voice ID — `v0.7-secretary-bot`.
+
+При необходимости отката интеграционной линии — `v0.6-quality`.
+
+При проблемах запуска аудио — `v0.5.1-safe` как историческая stability fallback.
+
+---
+
+## 2026-08-28.01 — v0.7 Secretary Bot зафиксирован в канонической истории
+
+- Версия: `v0.7-secretary-bot`
+- Тип: `feature`, `release`
+- Статус: `released`
+- Цель: добавить управляемого Секретаря-бота DION, roster участников и расширенную локальную speaker-attribution архитектуру поверх 0.6 Quality.
+
+### Изменения
+
+- добавлен flow `DION -> Секретарь-бот -> Подключить/Статус/Отключить`;
+- создаётся индивидуальный DION invite с видимым именем `Секретарь-бот`;
+- guest открывается в отдельном временном browser profile с отключённым выводом звука;
+- приложение получает список участников/сессий через DION IAPI;
+- добавлен статус присутствия бота и активных участников;
+- локальный sherpa-onnx speaker engine изолирован в отдельном процессе;
+- снят искусственный лимит пяти удалённых голосов;
+- overlapping speech помечается `[ПЕРЕБИВАНИЕ]`;
+- 0.6 Quality STT profile сохранён.
+
+### Проверка
+
+Windows production build и packaged self-test для опубликованного релиза прошли успешно до публикации.
+
+### Release/артефакт
+
+Release:
+
+`https://github.com/Zios86/test/releases/tag/v0.7-secretary-bot`
+
+Artifact:
+
+`DION_Meeting_Assistant_0.7_Secretary_Bot_Portable.exe`
+
+Размер:
+
+`627,522,154 bytes`
+
+SHA-256:
+
+`704dfcab816ac687f592baa6ff6c0feea785cd24b920eaf7594fe5e0364a00da`
+
+### Ограничения
+
+Документированный DION IAPI не предоставляет проверенный Windows/Python live active-speaker user ID или отдельные per-user live media tracks. Реальное корпоративное DION поведение требовало полевой проверки, что стало одной из причин последующего hardening 0.7.1.
+
+### Откат
+
+Предыдущий релиз: `v0.6-quality`.
 
 ---
 
