@@ -36,6 +36,8 @@ jobs:
       - name: Reconstruct source
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           $parts = @(
             "dion-portable/part00",
             "dion-portable/part01",
@@ -63,6 +65,8 @@ jobs:
       - name: Apply 0.5.1 through 0.7.1 patches
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           python dion-hotfix/apply_051.py src
           python dion-quality/apply_060.py
           python dion-secretary-bot/apply_070.py src
@@ -73,6 +77,8 @@ jobs:
         working-directory: src
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           python -m pip install pip==26.2.1
           pip install --no-deps -r requirements-ci.lock.txt
           pip check
@@ -86,6 +92,8 @@ jobs:
         working-directory: src
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           New-Item -ItemType Directory -Force bundled_models | Out-Null
           $manifest = Get-Content "..\release\model-manifest.json" -Raw | ConvertFrom-Json
           $whisperRepo = $manifest.whisper.repository
@@ -125,6 +133,8 @@ jobs:
         working-directory: src
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           $exe = ".\dist\DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe"
           $p = Start-Process -FilePath $exe -ArgumentList "--portable-selftest" -PassThru -Wait
           if ($p.ExitCode -ne 0) { throw "Portable self-test failed: $($p.ExitCode)" }
