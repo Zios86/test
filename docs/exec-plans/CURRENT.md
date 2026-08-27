@@ -2,75 +2,75 @@
 
 ## Objective
 
-Harden version 0.6 speech-recognition quality using real DION field evidence while preserving 0.5.1 audio stability.
+Complete and publish **DION Meeting Assistant 0.7.1 Hardening** after the 0.7 Secretary Bot release, while preserving offline STT quality and the shared-PortAudio stability architecture.
 
 ## Current state
 
 Completed:
 
-- 0.6 Quality implementation exists;
-- Whisper small is bundled in the portable release;
-- beam 5/context/hotwords/VAD improvements are implemented;
-- source test baseline is 25 passing tests;
-- packaged Windows EXE self-test passed;
-- `v0.6-quality` is published;
-- project documentation has been reorganized for Claude/OpenAI cross-AI use.
+- `v0.7-secretary-bot` is published;
+- DION Secretary Bot integration is implemented;
+- 0.7.1 hardening patch is implemented on `hardening-0.7.1`;
+- mTLS client certificate/key/password support is wired into DION integration;
+- diarization remains opt-in by default;
+- active DION participants are used to constrain voice identity candidates;
+- persistent voice profiles omit participant name/e-mail and use Windows DPAPI protection;
+- stale Secretary Bot guest profiles are cleaned and normal shutdown revokes the invite;
+- mixed-speaker Whisper output can be split using word timestamps at diarization handoffs;
+- dependency versions and model inputs are pinned for CI/release builds;
+- GitHub Release workflow refuses to overwrite an existing `v0.7.1` tag;
+- Windows PR CI passed application tests, dependency checks, pinned-model validation, EXE build and packaged `--portable-selftest`.
 
-Not yet proven:
+Validated PR build:
 
-- quantified WER/CER improvement on reference audio;
-- long-duration stability on multiple corporate Windows endpoints;
-- safe default diarization.
+```text
+GitHub Actions run: 33126146077
+Result: success
+```
 
-## Next evidence to collect
+The Release publication step was intentionally skipped in the pull-request run. Publication happens only after merge/push to `dion-exe-build`.
 
-1. Run a representative DION meeting with 0.6.
-2. Export the transcript JSON.
-3. Preferably keep a local reference audio or manually corrected reference transcript for accuracy measurement.
-4. Classify errors using `design-docs/SPEECH_RECOGNITION.md` taxonomy.
-5. Decide whether the next release should focus on:
-   - terminology persistence;
-   - chunk-boundary handling;
-   - low-confidence review;
-   - session-end reprocessing.
+## Release sequence now
 
-## Planned implementation candidate: 0.6.1
+1. Keep documentation synchronized with the implemented 0.7.1 behavior.
+2. Merge PR #1 into `dion-exe-build` only after the green PR build.
+3. Let the production push workflow reconstruct, test and build the Windows EXE again.
+4. Require packaged `--portable-selftest` to pass.
+5. Publish immutable tag `v0.7.1` and artifact:
 
-### A. Persistent approved terminology
+```text
+DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe
+```
 
-- local dictionary storage;
-- separate global and per-meeting terms;
-- import/export;
-- no automatic learning of arbitrary sensitive phrases.
+6. Read the actual GitHub Release asset size and SHA-256.
+7. Record those exact values in `docs/RELEASES.md` and append a released entry to `docs/VERSION_JOURNAL.md`.
 
-### B. Recognition confidence/review
+## Still requires field validation
 
-- flag suspicious/low-confidence fragments;
-- make uncertainty visible in UI/export without deleting original text.
+CI/self-test does **not** prove:
 
-### C. Final-pass mode
+- real corporate DION mTLS authorization with production certificates;
+- Secretary Bot behavior in an actual corporate meeting;
+- long-duration WASAPI loopback + microphone stability on user endpoints;
+- real speaker-attribution accuracy with overlapping speech;
+- real Russian WER/CER improvement on reference audio.
 
-Explore an optional post-meeting pass that can use broader context for final transcript quality while keeping live recognition incremental.
+These claims must remain marked as field-test pending until verified on actual Windows/DION infrastructure.
 
-Privacy condition: if audio retention is required, it must be explicit/temporary and deleted according to documented policy.
+## Privacy/security follow-up
 
-## Out of scope for the immediate quality pass
+Repository visibility must be checked separately from application security. If the project repository is intended to be private, GitHub repository settings must show `visibility: private`; source code must never contain DION tokens, private keys, passwords, real participant data, or meeting transcripts.
 
-- cloud STT;
-- automatic persistent biometric speaker identity;
-- enabling diarization by default;
-- automatically sending transcript/protocol to external systems;
-- major UI redesign unrelated to quality.
+## Next engineering work after 0.7.1
 
-## Completion criteria for next quality iteration
+Priority order:
 
-- representative field evidence collected;
-- error categories documented;
-- automated tests added for deterministic quality logic;
-- Windows build/self-test passes;
-- documentation updated in the same change;
-- release notes distinguish measured improvement from expected improvement.
+1. corporate DION/mTLS field test;
+2. real Secretary Bot lifecycle test;
+3. speaker-attribution evaluation using sanitized/reference material;
+4. recognition WER/CER comparison;
+5. decide whether the next release focuses on terminology persistence, confidence review, final-pass transcription, or further speaker isolation.
 
 ## Update rule
 
-This file is not a diary. Rewrite it when the active objective changes. Move completed durable facts to `ROADMAP.md`, `RELEASES.md`, `CHANGELOG.md` or a design doc.
+This file is the active plan, not a historical diary. Durable completed facts belong in `ROADMAP.md`, `RELEASES.md`, `CHANGELOG.md`, design docs and the append-only `VERSION_JOURNAL.md`.
