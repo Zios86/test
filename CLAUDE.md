@@ -7,9 +7,10 @@ Keep this file short. Detailed project knowledge belongs in `docs/`; do not dupl
 Before changing anything:
 
 1. Read `docs/PROJECT_MAP.md`.
-2. Read the relevant document under `docs/design-docs/` or `docs/DEVELOPMENT.md`.
-3. Inspect only the mapped code/build files.
-4. Use project Skills under `.claude/skills/` when their descriptions match the task.
+2. If continuing recent work or investigating a regression, read the latest relevant entries in `docs/VERSION_JOURNAL.md`.
+3. Read the relevant document under `docs/design-docs/` or `docs/DEVELOPMENT.md`.
+4. Inspect only the mapped code/build files.
+5. Use project Skills under `.claude/skills/` when their descriptions match the task.
 
 ## Source of truth
 
@@ -40,12 +41,15 @@ Every code/build/configuration change must update the affected documentation in 
 
 Typical mapping:
 
+- every significant update -> append `docs/VERSION_JOURNAL.md`;
 - behavior -> `CHANGELOG.md`;
 - code location/responsibility -> `docs/PROJECT_MAP.md`;
 - architecture/data flow -> `docs/ARCHITECTURE.md` or a design doc;
 - tests/build/dependencies -> `docs/DEVELOPMENT.md`;
-- release/status -> `docs/RELEASES.md`, `docs/ROADMAP.md`;
+- release/status -> `docs/RELEASES.md`, `docs/ROADMAP.md`, `docs/VERSION_JOURNAL.md`;
 - active work -> `docs/exec-plans/CURRENT.md`.
+
+`VERSION_JOURNAL.md` is append-only. Correct history with a new entry instead of rewriting old entries.
 
 ## Validation baseline
 
@@ -62,7 +66,7 @@ Portable release builds must also pass the packaged `--portable-selftest` on Win
 ## Useful project Skills
 
 - `project-navigation` — locate the right code without scanning the whole project.
-- `documentation-maintenance` — update the knowledge base after any change.
-- `release-process` — build/test/release workflow.
+- `documentation-maintenance` — update the knowledge base and version journal after any change.
+- `release-process` — build/test/release workflow and release journal entry.
 
 When a Skill is relevant, read its `SKILL.md` and only then load referenced supporting files as needed.
