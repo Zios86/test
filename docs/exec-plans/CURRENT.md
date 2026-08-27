@@ -2,48 +2,34 @@
 
 ## Objective
 
-Complete and publish **DION Meeting Assistant 0.7.1 Hardening** after the 0.7 Secretary Bot release, while preserving offline STT quality and the shared-PortAudio stability architecture.
+Field-validate the now-published **DION Meeting Assistant 0.7.1 Hardening** release and use real evidence to choose the next engineering iteration.
 
 ## Current state
 
 Completed:
 
-- `v0.7-secretary-bot` is published;
-- DION Secretary Bot integration is implemented;
-- 0.7.1 hardening patch is implemented on `hardening-0.7.1`;
-- mTLS client certificate/key/password support is wired into DION integration;
-- diarization remains opt-in by default;
-- active DION participants are used to constrain voice identity candidates;
-- persistent voice profiles omit participant name/e-mail and use Windows DPAPI protection;
-- stale Secretary Bot guest profiles are cleaned and normal shutdown revokes the invite;
-- mixed-speaker Whisper output can be split using word timestamps at diarization handoffs;
-- dependency versions and model inputs are pinned for CI/release builds;
-- GitHub Release workflow refuses to overwrite an existing `v0.7.1` tag;
-- Windows PR CI passed application tests, dependency checks, pinned-model validation, EXE build and packaged `--portable-selftest`.
+- PR #1 merged into `dion-exe-build` at commit `a8f8a08d1f80f25fa6281ec16fe171e5ac788776`;
+- PR Windows CI run `33126146077` passed tests, dependency validation, pinned-model validation, EXE build and packaged `--portable-selftest`;
+- production Windows CI run `33126756679` repeated the release gates successfully;
+- GitHub Release `v0.7.1` was published successfully;
+- artifact: `DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe`;
+- size: `627,528,485 bytes`;
+- SHA-256: `90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239`;
+- release page: `https://github.com/Zios86/test/releases/tag/v0.7.1`;
+- canonical release metadata is recorded in `docs/RELEASES.md`.
 
-Validated PR build:
+## What is implemented in 0.7.1
 
-```text
-GitHub Actions run: 33126146077
-Result: success
-```
-
-The Release publication step was intentionally skipped in the pull-request run. Publication happens only after merge/push to `dion-exe-build`.
-
-## Release sequence now
-
-1. Keep documentation synchronized with the implemented 0.7.1 behavior.
-2. Merge PR #1 into `dion-exe-build` only after the green PR build.
-3. Let the production push workflow reconstruct, test and build the Windows EXE again.
-4. Require packaged `--portable-selftest` to pass.
-5. Publish immutable tag `v0.7.1` and artifact:
-
-```text
-DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe
-```
-
-6. Read the actual GitHub Release asset size and SHA-256.
-7. Record those exact values in `docs/RELEASES.md` and append a released entry to `docs/VERSION_JOURNAL.md`.
+- DION mTLS client certificate, PEM key and optional key password support;
+- diarization opt-in by default;
+- Voice ID candidates constrained to active DION participants;
+- persistent voice-profile payload without participant name/e-mail and protected with Windows DPAPI;
+- Secretary Bot invite revocation on normal shutdown when possible;
+- stale temporary Secretary Bot browser-profile cleanup;
+- Whisper word timestamps used only with diarization and speaker-handoff text splitting;
+- more conservative cross-meeting voice-match thresholds;
+- locked CI dependencies and pinned model inputs;
+- versioned release policy that refuses to overwrite an existing `v0.7.1` tag.
 
 ## Still requires field validation
 
@@ -55,21 +41,33 @@ CI/self-test does **not** prove:
 - real speaker-attribution accuracy with overlapping speech;
 - real Russian WER/CER improvement on reference audio.
 
-These claims must remain marked as field-test pending until verified on actual Windows/DION infrastructure.
+These remain explicitly unverified until tested on the target Windows/DION environment.
 
-## Privacy/security follow-up
+## Next evidence to collect
 
-Repository visibility must be checked separately from application security. If the project repository is intended to be private, GitHub repository settings must show `visibility: private`; source code must never contain DION tokens, private keys, passwords, real participant data, or meeting transcripts.
+1. Connect with the corporate DION token and mTLS material.
+2. Test Secretary Bot join, participant roster, revoke and waiting-room behavior.
+3. Test system audio + microphone together on the target PC.
+4. Test 2/5/10 participant meetings with rapid speaker switching and overlap.
+5. Run a 60+ minute meeting and inspect queue depth, dropped chunks and latency.
+6. Measure false accepts/rejects for Voice ID and diarization errors.
+7. Where permitted, compare recognition against a manually corrected reference transcript using WER/CER.
 
-## Next engineering work after 0.7.1
+## Candidate next work
 
-Priority order:
+After field evidence, prioritize one or more of:
 
-1. corporate DION/mTLS field test;
-2. real Secretary Bot lifecycle test;
-3. speaker-attribution evaluation using sanitized/reference material;
-4. recognition WER/CER comparison;
-5. decide whether the next release focuses on terminology persistence, confidence review, final-pass transcription, or further speaker isolation.
+- asynchronous speaker analysis;
+- PFX/P12 certificate support if required by corporate provisioning;
+- approved terminology profiles;
+- confidence/review markers;
+- optional final-pass transcript refinement;
+- migration from encoded `part* + apply_*.py` release tree to a normal source tree;
+- Authenticode/corporate packaging.
+
+## Repository administration
+
+GitHub currently reports repository `Zios86/test` as `public`. If this project is intended to remain private, repository visibility must be changed in GitHub settings; the available connector actions in this session do not expose a repository-visibility mutation.
 
 ## Update rule
 
