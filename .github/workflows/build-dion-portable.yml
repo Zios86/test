@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -43,36 +43,40 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Apply 0.5.1 native-audio crash hotfix
+      - name: Apply stability and recognition patches
         shell: pwsh
         run: |
           python dion-hotfix/apply_051.py src
+          python dion-quality/apply_060.py
           python -m compileall -q src/app src/run.py
 
-      - name: Install build dependencies and validate hotfix
+      - name: Install dependencies and validate Quality profile
         working-directory: src
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller huggingface_hub pytest
-          python -c "from pathlib import Path; a=Path('app/audio.py').read_text(encoding='utf-8'); u=Path('app/ui.py').read_text(encoding='utf-8'); assert '_PA_INSTANCE = None' in a; assert '_PA_OPEN_LOCK' in a; assert 'enable_diarization.setChecked(False)' in u; print('Hotfix source checks passed')"
+          python -c "from pathlib import Path; a=Path('app/audio.py').read_text(encoding='utf-8'); u=Path('app/ui.py').read_text(encoding='utf-8'); t=Path('app/transcriber.py').read_text(encoding='utf-8'); assert '_PA_INSTANCE = None' in a; assert '_PA_OPEN_LOCK' in a; assert 'enable_diarization.setChecked(False)' in u; assert 'chunk_seconds.setValue(12)' in u; assert 'hotwords=self.hotwords_edit.text()' in u; assert 'beam_size=self.beam_size' in t; assert 'condition_on_previous_text=True' in t; print('0.6 Quality source checks passed')"
           python -c "from app.audio import _acquire_pa,_release_pa; p1=_acquire_pa(); p2=_acquire_pa(); assert p1 is p2; _release_pa(); _release_pa(); print('Shared PortAudio context check passed')"
-          if (Test-Path tests) { pytest -q tests } else { Write-Host "Compact reconstruction has no tests folder; local suite already passed 20/20." }
+          python -c "from inspect import signature; from faster_whisper import WhisperModel; p=signature(WhisperModel.transcribe).parameters; assert 'hotwords' in p; assert 'initial_prompt' in p; assert 'vad_parameters' in p; print('faster-whisper Quality options available')"
+          python -c "import queue; from app.transcriber import TranscriptionWorker; w=TranscriptionWorker(input_queue=queue.Queue(),hotwords='DION, Naumen, dion'); assert w.hotwords=='DION, Naumen'; w._remember('system','запрос на уточнение в Naumen'); assert 'запрос на уточнение' in w._initial_prompt('system'); items=[{'start':0.0,'end':1.0,'speaker':'DION / участник','speaker_key':None,'text':'Нужно проверить'},{'start':1.2,'end':2.0,'speaker':'DION / участник','speaker_key':None,'text':'комментарии в заявке'}]; assert len(w._merge_candidates(items))==1; print('Quality logic checks passed')"
 
-      - name: Download compact offline models
+      - name: Download offline quality models
         working-directory: src
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force bundled_models | Out-Null
-          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-base', local_dir='bundled_models/faster-whisper-small')"
+          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-small', local_dir='bundled_models/faster-whisper-small')"
           Invoke-WebRequest -Uri "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx" -OutFile "bundled_models/wespeaker_en_voxceleb_resnet34.onnx"
+          $model = Get-Item "bundled_models/faster-whisper-small/model.bin"
+          if ($model.Length -lt 400MB) { throw "Whisper small model is unexpectedly small: $($model.Length)" }
           Get-ChildItem bundled_models -Recurse | Select-Object FullName,Length
 
-      - name: Build single portable EXE
+      - name: Build single Quality portable EXE
         working-directory: src
         shell: cmd
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.5.1_Safe_Portable" ^
+          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.6_Quality_Portable" ^
             --collect-all faster_whisper ^
             --collect-all ctranslate2 ^
             --collect-all av ^
@@ -85,7 +89,7 @@ jobs:
         working-directory: src
         shell: pwsh
         run: |
-          $exe = ".\dist\DION_Meeting_Assistant_0.5.1_Safe_Portable.exe"
+          $exe = ".\dist\DION_Meeting_Assistant_0.6_Quality_Portable.exe"
           $p = Start-Process -FilePath $exe -ArgumentList "--portable-selftest" -PassThru -Wait
           if ($p.ExitCode -ne 0) { throw "Portable self-test failed: $($p.ExitCode)" }
           Get-FileHash $exe -Algorithm SHA256
@@ -97,33 +101,39 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v0.5.1-safe"
-          $exe = ".\dist\DION_Meeting_Assistant_0.5.1_Safe_Portable.exe"
+          $tag = "v0.6-quality"
+          $exe = ".\dist\DION_Meeting_Assistant_0.6_Quality_Portable.exe"
           $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
           $notes = @"
-          DION Meeting Assistant 0.5.1 Safe
+          DION Meeting Assistant 0.6 Quality
 
-          Исправлено аварийное закрытие при старте стенографии:
-          - общий PortAudio-контекст для Loopback и микрофона;
-          - синхронизация открытия/закрытия аудиопотоков;
-          - разделение спикеров выключено по умолчанию для безопасного первого запуска;
-          - ошибки старта отображаются в интерфейсе вместо закрытия приложения;
-          - встроенная offline Whisper base модель;
-          - Windows self-test готового EXE проходит успешно.
+          Улучшение распознавания русской речи по результатам реальной стенограммы DION:
+          - полноценная offline Whisper small вместо base;
+          - beam search 5 вместо greedy beam 1;
+          - контекст предыдущих реплик между аудиофрагментами;
+          - редактируемый словарь терминов, ФИО и названий систем;
+          - встроенный словарь DION / Naumen / Service Desk / КСПД / ALT Linux / WMS и терминов техподдержки;
+          - VAD настроен для сохранения коротких русских слов;
+          - соседние короткие сегменты одного говорящего объединяются в цельную реплику;
+          - длина фрагмента по умолчанию увеличена с 8 до 12 секунд;
+          - исправление безопасного общего PortAudio-контекста из 0.5.1 сохранено;
+          - разделение спикеров по-прежнему выключено по умолчанию для стабильности.
+
+          Рекомендация: перед ВКС добавьте в поле «Словарь» фамилии участников и названия систем конкретной встречи.
 
           SHA-256 EXE: $hash
           "@
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $exe --clobber --repo $env:GITHUB_REPOSITORY
-            gh release edit $tag --title "DION Meeting Assistant 0.5.1 Safe" --notes $notes --repo $env:GITHUB_REPOSITORY
+            gh release edit $tag --title "DION Meeting Assistant 0.6 Quality" --notes $notes --repo $env:GITHUB_REPOSITORY
           } else {
-            gh release create $tag $exe --target $env:GITHUB_SHA --title "DION Meeting Assistant 0.5.1 Safe" --notes $notes --repo $env:GITHUB_REPOSITORY
+            gh release create $tag $exe --target $env:GITHUB_SHA --title "DION Meeting Assistant 0.6 Quality" --notes $notes --repo $env:GITHUB_REPOSITORY
           }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DION_Meeting_Assistant_0.5.1_Safe_Portable
-          path: src/dist/DION_Meeting_Assistant_0.5.1_Safe_Portable.exe
+          name: DION_Meeting_Assistant_0.6_Quality_Portable
+          path: src/dist/DION_Meeting_Assistant_0.6_Quality_Portable.exe
           compression-level: 6
           if-no-files-found: error
