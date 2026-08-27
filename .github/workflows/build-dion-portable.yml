@@ -47,12 +47,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller huggingface_hub
 
-      - name: Download offline models
+      - name: Download compact offline models
         working-directory: src
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force bundled_models | Out-Null
-          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-small', local_dir='bundled_models/faster-whisper-small')"
+          # Keep the directory name expected by the 0.5 source while bundling the smaller multilingual base model.
+          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Systran/faster-whisper-base', local_dir='bundled_models/faster-whisper-small')"
           Invoke-WebRequest -Uri "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx" -OutFile "bundled_models/wespeaker_en_voxceleb_resnet34.onnx"
           Get-ChildItem bundled_models -Recurse | Select-Object FullName,Length
 
@@ -60,7 +61,7 @@ jobs:
         working-directory: src
         shell: cmd
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.5_Portable" ^
+          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.5_Portable_Base" ^
             --collect-all faster_whisper ^
             --collect-all ctranslate2 ^
             --collect-all av ^
@@ -73,7 +74,7 @@ jobs:
         working-directory: src
         shell: pwsh
         run: |
-          $exe = ".\dist\DION_Meeting_Assistant_0.5_Portable.exe"
+          $exe = ".\dist\DION_Meeting_Assistant_0.5_Portable_Base.exe"
           $p = Start-Process -FilePath $exe -ArgumentList "--portable-selftest" -PassThru -Wait
           if ($p.ExitCode -ne 0) { throw "Portable self-test failed: $($p.ExitCode)" }
           Get-FileHash $exe -Algorithm SHA256
@@ -81,7 +82,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DION_Meeting_Assistant_0.5_Portable
-          path: src/dist/DION_Meeting_Assistant_0.5_Portable.exe
-          compression-level: 0
+          name: DION_Meeting_Assistant_0.5_Portable_Base
+          path: src/dist/DION_Meeting_Assistant_0.5_Portable_Base.exe
+          compression-level: 6
           if-no-files-found: error
