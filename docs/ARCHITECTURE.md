@@ -1,5 +1,22 @@
 # Architecture
 
+## 1.0 post-meeting precision flow
+
+Live recognition remains offline and independent. During a meeting, each capture worker writes its normal temporary STT chunks and a continuous `system_audio.wav` or `microphone_audio.wav`. After the transcription queue drains, the user may explicitly start a second-stage job:
+
+```text
+immutable draft + two WAV tracks
+        -> ZIP package
+        -> authenticated private-LAN streaming upload
+        -> faster-whisper large-v3-turbo
+        -> conservative Ollama correction
+        -> precise JSON + corrected TXT + comparison JSON
+```
+
+The server is a separate Windows package intended for `192.168.1.128`. It queues jobs asynchronously, streams uploads/downloads, rejects archive path traversal, and binds to the LAN only when an allowed client IP is supplied. Failure of the server, model or Ollama never rewrites the originals and never disables live STT. If Ollama fails, the precise Whisper result remains usable.
+
+The target AMD FX-6350/24 GB system is expected to process recordings substantially slower than real time; this is deliberately a post-meeting path.
+
 ## Goal
 DION Meeting Assistant is a Windows offline-first meeting secretary. The current development line combines 0.5.1 audio safety, 0.6 Russian STT quality, 0.7 Secretary Bot integration, 0.7.1 hardening, 0.8 Visual Refresh and 0.9 room-URL-first Guest Secretary Bot.
 
