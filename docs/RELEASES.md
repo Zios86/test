@@ -1,10 +1,51 @@
 # Releases
 
-This file records published artifacts and the engineering meaning of each release. GitHub Release is the source for the actual downloadable binary; this document is the project index.
+This file records **published artifacts only** plus the engineering meaning of each published release. GitHub Release is the source for the actual downloadable binary.
 
-For chronological engineering history, including unreleased significant updates, use `VERSION_JOURNAL.md`.
+For unreleased significant work use `VERSION_JOURNAL.md` and `ROADMAP.md`.
 
-## v0.8-visual-refresh — current release
+## 0.9 Guest Secretary Bot — NOT YET RELEASED
+
+Status: **development candidate / unreleased** on branch `dion-guest-bot-0.9`.
+
+Planned release identity:
+
+```text
+Tag: v0.9-guest-secretary-bot
+Artifact: DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
+```
+
+Do **not** add size/SHA-256 or claim a Release until Windows PR CI, merge, production build, packaged self-test and GitHub Release publication actually succeed.
+
+Implemented candidate behavior:
+- ordinary HTTPS `/join/<slug>` room URL is primary Guest Bot input;
+- corporate/on-prem hostnames supported;
+- no mandatory `event_id`/token/mTLS for guest entry;
+- isolated Edge/Chrome guest session with bot audio muted;
+- localhost-only DevTools best-effort auto-name/guest-click plus manual fallback;
+- optional configurable IAPI base URL and token/mTLS advanced settings;
+- optional participant metadata by slug, explicitly not current-presence proof;
+- conservative explicit-data/ARIA browser participant/speaker probe;
+- no speaker inference from color, generic text or microphone-enabled state;
+- browser live-speaker state not yet used to retroactively relabel delayed Whisper chunks;
+- 0.8 visual shell and 0.7.1 hardening retained.
+
+Source validation so far:
+
+```text
+36/36 tests passed
+compileall passed
+```
+
+Windows/release validation: **pending**.
+
+Rollback/published fallback: `v0.8-visual-refresh`.
+
+Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.04`.
+
+---
+
+## v0.8-visual-refresh — current published release
 
 Status: **published** on 2026-08-28.
 
@@ -45,28 +86,21 @@ b7ee9bb5017348a83b99e48246a65c5309d35315
 ```
 
 Key behavior:
-
 - native PySide6/QSS modern light application shell;
-- seven-page left navigation: Meeting, Transcript, Protocol, Participants, Secretary Bot, Diagnostics, Settings;
-- card-based live transcript with active-speaker and overlap/interruption states;
-- top live-status bar for meeting/recording/audio/DION state;
-- right summary rail for participant count, active speaker, audio quality, protocol readiness and hotwords;
-- persistent bottom quick actions for Start/Stop, DOCX export and protocol access;
-- dedicated Secretary Bot visual status card/page;
-- 0.7.1 Hardening behavior preserved: offline STT, shared PortAudio safety, DION mTLS, opt-in diarization, active-only Voice ID and DPAPI-protected persistent voice profiles.
+- seven-page navigation;
+- card-based live transcript with active/overlap states;
+- top live status, right summary rail and bottom quick actions;
+- dedicated Secretary Bot visual page;
+- 0.7.1 hardening preserved.
 
 Build validation:
+- local visual-refresh workspace: 48/48 tests + compileall;
+- visual PR build `33129215245` passed;
+- initial production build `33129501062` passed application gates but failed only at old release-existence guard;
+- release-guard PR build `33145190036` passed;
+- final production build `33145419554` passed all gates, Release publication and artifact upload.
 
-- local visual-refresh workspace: 48/48 tests + compileall passed;
-- visual PR build `33129215245`: source checks, Qt offscreen MainWindow smoke, pinned models, EXE build and packaged self-test passed;
-- initial production build `33129501062`: application/model/build/self-test gates passed, but publication stopped at the old release-existence guard;
-- release-guard PR build `33145190036`: passed after the workflow-only fix;
-- final production build `33145419554`: all gates passed, Release publication succeeded, Actions artifact upload succeeded.
-
-Field limitation:
-
-- CI does not prove exact visual/usability behavior on the target Windows resolution/DPI;
-- corporate DION/mTLS/WASAPI and real speaker-attribution accuracy remain field-test pending.
+Field limitations: target Windows DPI/usability, corporate DION/mTLS/WASAPI and real speaker accuracy remain field-test dependent.
 
 Rollback: `v0.7.1`.
 
@@ -74,196 +108,81 @@ Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.03`.
 
 ## v0.7.1
 
-Status: **published** on 2026-08-28 (Europe/Tallinn local date; GitHub published at 2026-08-27 23:39:19 UTC).
+Status: **published**.
 
-Artifact:
+Artifact: `DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe`
 
-```text
-DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe
-```
+Size: `627,528,485 bytes`
 
-Size:
+SHA-256: `90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239`
 
-```text
-627,528,485 bytes
-```
-
-SHA-256:
-
-```text
-90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239
-```
-
-Release page:
-
-```text
-https://github.com/Zios86/test/releases/tag/v0.7.1
-```
-
-Direct asset:
-
-```text
-https://github.com/Zios86/test/releases/download/v0.7.1/DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe
-```
-
-Target commit:
-
-```text
-a8f8a08d1f80f25fa6281ec16fe171e5ac788776
-```
+Release: `https://github.com/Zios86/test/releases/tag/v0.7.1`
 
 Key behavior:
+- DION mTLS client certificate + PEM key + optional key password;
+- diarization opt-in;
+- active-only Voice ID candidates;
+- DPAPI-protected persistent voice profiles without name/e-mail;
+- Secretary Bot lifecycle cleanup;
+- word-timestamp speaker handoff splitting;
+- pinned dependencies/models and non-clobber release policy.
 
-- DION mTLS client certificate + PEM key + optional key password support;
-- diarization is opt-in by default;
-- Voice ID candidates are limited to active DION participants;
-- persistent voice-profile payload omits participant name/e-mail and is protected with Windows DPAPI;
-- Secretary Bot invite is revoked on normal shutdown when possible;
-- stale temporary Secretary Bot browser profiles are cleaned;
-- Whisper word timestamps are enabled only with diarization and can split text at speaker handoffs;
-- more conservative cross-meeting voice-match thresholds;
-- locked Windows CI dependency set and pinned model inputs;
-- release workflow refuses to overwrite an existing `v0.7.1` tag.
+Validation: PR run `33126146077`, production run `33126756679`, packaged self-test and Release publication passed.
 
-Build validation:
-
-- PR Windows build `33126146077`: tests, locked dependencies, pinned models, EXE build and packaged self-test passed;
-- production push build `33126756679`: tests, pinned models, EXE build and packaged self-test passed before Release publication;
-- Release publication step completed successfully.
-
-Still requires field validation on corporate DION/mTLS, real WASAPI endpoints and real speaker-attribution accuracy.
-
-Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.02`.
+Journal entry: `2026-08-28.02`.
 
 ## v0.7-secretary-bot
 
 Status: **published**.
 
-Artifact:
+Artifact: `DION_Meeting_Assistant_0.7_Secretary_Bot_Portable.exe`
 
-```text
-DION_Meeting_Assistant_0.7_Secretary_Bot_Portable.exe
-```
+Size: `627,522,154 bytes`
 
-Size:
+SHA-256: `704dfcab816ac687f592baa6ff6c0feea785cd24b920eaf7594fe5e0364a00da`
 
-```text
-627,522,154 bytes
-```
+Release: `https://github.com/Zios86/test/releases/tag/v0.7-secretary-bot`
 
-SHA-256:
+Key behavior: API-created named Secretary Bot invite, participant/session polling, isolated diarization fallback, overlap marker, no five-speaker app limit.
 
-```text
-704dfcab816ac687f592baa6ff6c0feea785cd24b920eaf7594fe5e0364a00da
-```
+Known limitation: documented IAPI is not a Windows/Python per-user media or verified live active-speaker feed.
 
-Release page:
-
-```text
-https://github.com/Zios86/test/releases/tag/v0.7-secretary-bot
-```
-
-Key behavior:
-
-- `DION -> Секретарь-бот` connect/status/disconnect flow;
-- individual DION invite with visible guest name `Секретарь-бот`;
-- dedicated temporary browser profile;
-- participant/session polling through documented DION IAPI;
-- isolated local sherpa-onnx diarization fallback;
-- no five-speaker application limit;
-- overlap marker `[ПЕРЕБИВАНИЕ]`;
-- 0.6 Quality STT behavior retained.
-
-Known limitation:
-
-- documented IAPI does not provide a Windows/Python live active-speaker user ID or separate per-user live audio track;
-- real corporate DION permissions/join behavior require field validation.
-
-Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.01`.
+Journal entry: `2026-08-28.01`.
 
 ## v0.6-quality
 
 Status: **published**.
 
-Artifact:
+Artifact: `DION_Meeting_Assistant_0.6_Quality_Portable.exe`
 
-```text
-DION_Meeting_Assistant_0.6_Quality_Portable.exe
-```
+Size: `621,933,502 bytes`
 
-Size:
+SHA-256: `85a8d0b443b4e07c6b5df16b255775ed7c960da5cc0ddc9e9bab51a5d3658334`
 
-```text
-621,933,502 bytes
-```
+Release: `https://github.com/Zios86/test/releases/tag/v0.6-quality`
 
-SHA-256:
+Key behavior: offline Whisper small, beam 5, context/hotwords, tuned VAD, 12-second chunks, 0.5.1 PortAudio safety retained.
 
-```text
-85a8d0b443b4e07c6b5df16b255775ed7c960da5cc0ddc9e9bab51a5d3658334
-```
-
-Release page:
-
-```text
-https://github.com/Zios86/test/releases/tag/v0.6-quality
-```
-
-Key behavior:
-
-- offline faster-whisper `small` bundled;
-- beam search 5;
-- prior transcript context;
-- editable hotwords/domain dictionary;
-- tuned VAD;
-- 12-second default chunks;
-- shared PortAudio stability fix retained;
-- diarization off by default.
-
-Build validation:
-
-- Quality source checks passed in Windows CI;
-- packaged EXE self-test passed before publication;
-- reconstructed source baseline: 25 tests passing.
-
-Still requires field validation on real DION audio for recognition quality.
-
-Journal entry: `VERSION_JOURNAL.md` -> `2026-08-27.03`.
+Journal entry: `2026-08-27.03`.
 
 ## v0.5.1-safe — stability fallback
 
-Status: **published** and retained as a fallback.
+Status: **published**.
 
-Purpose:
+Release: `https://github.com/Zios86/test/releases/tag/v0.5.1-safe`
 
-- fix application closing when transcription starts;
-- use one shared PortAudio context for loopback and microphone;
-- reduce simultaneous risky native-library initialization;
-- keep diarization disabled by default.
+Purpose: shared PortAudio context and safer startup after start-transcription crash. Historical compact build used Whisper base and has lower recognition quality.
 
-Known quality limitation:
-
-- portable build used Whisper `base` to keep artifact size smaller;
-- real transcript testing showed unacceptable Russian/technical vocabulary errors, which motivated 0.6.
-
-Release page:
-
-```text
-https://github.com/Zios86/test/releases/tag/v0.5.1-safe
-```
-
-Journal entry: `VERSION_JOURNAL.md` -> `2026-08-27.02`.
+Journal entry: `2026-08-27.02`.
 
 ## Release policy
-
 For every future release:
+1. Tests/build checks pass.
+2. Windows packaged self-test passes.
+3. Actual uploaded binary SHA-256 is recorded here and in Release notes.
+4. A released journal entry records validation, limitations and rollback.
+5. `CHANGELOG.md` and `ROADMAP.md` are updated.
+6. Field-tested claims and CI-only claims are distinguished.
+7. Published tags/assets are never overwritten; bump the version.
 
-1. Tests and build checks must pass.
-2. Packaged EXE self-test must pass on Windows.
-3. Actual uploaded binary SHA-256 must be recorded here and in GitHub Release notes.
-4. A released entry must be appended to `VERSION_JOURNAL.md` with validation, limitations and rollback/fallback information.
-5. `CHANGELOG.md` and `ROADMAP.md` must be updated in the same task.
-6. Field-tested claims and CI-only claims must be distinguished explicitly.
-7. Published version tags/assets must not be overwritten; bump the version instead.
-
-Do not overwrite historical facts about an old release to match a newer implementation.
+Never invent artifact metadata for an unreleased candidate.
