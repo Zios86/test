@@ -18,6 +18,7 @@ Short entry point for AI coding agents. Canonical project knowledge lives in `do
 - `dion-hardening/apply_071.py`;
 - `dion-visual/apply_080.py`;
 - `dion-guest-bot/apply_090.py`.
+- `dion-browser-gate/apply_091.py`.
 
 Do not scan encoded `part*` files for orientation. Use `docs/PROJECT_MAP.md`.
 
@@ -34,6 +35,8 @@ Validation:
 - production Windows CI `33150927129`: tests, pinned models, EXE build, packaged self-test and Release publication passed.
 
 Corporate DION guest form/DOM semantics, real WASAPI behavior and browser-speaker timing remain field checks.
+
+The 0.9.1 browser-gate hotfix is implemented locally with `37/37` tests passing; Windows CI/release validation is pending.
 
 ## Non-negotiable rules
 - Windows 10/11 x64 target; STT local/offline by default.

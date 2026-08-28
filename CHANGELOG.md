@@ -2,6 +2,13 @@
 
 All notable user-visible changes to DION Meeting Assistant are recorded here.
 
+## 0.9.1 Browser Gate Hotfix — unreleased
+
+- Added automatic handling of the corporate DION «Переход в Конференции» page.
+- The bot now clicks «Продолжить в браузере», waits for the guest form, enters `Секретарь-бот`, and clicks «Войти как гость».
+- The visible manual fallback remains available when browser automation is unavailable.
+- Added a regression test for the confirmed two-stage corporate DION flow.
+
 ## 0.9 Guest Secretary Bot — 2026-08-28
 
 ### Guest entry

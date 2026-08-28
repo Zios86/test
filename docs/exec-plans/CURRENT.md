@@ -1,7 +1,7 @@
 # Current execution plan
 
 ## Objective
-Field-validate the published **DION Meeting Assistant 0.9 Guest Secretary Bot** on the target Windows workstation and real corporate DION web client, then use evidence to choose the next engineering iteration.
+Build and publish **DION Meeting Assistant 0.9.1 Browser Gate Hotfix**, then field-validate the confirmed two-stage corporate DION entry flow on the target Windows workstation.
 
 ## Published baseline
 ```text
@@ -37,12 +37,11 @@ Release page: `https://github.com/Zios86/test/releases/tag/v0.9-guest-secretary-
 ## Immediate field-validation checklist
 ### Guest entry
 1. Paste a real corporate `/join/<slug>` URL.
-2. Confirm parsed host/slug.
-3. Connect with token/mTLS empty.
-4. Confirm isolated Edge/Chrome guest session opens.
-5. Confirm bot-browser audio is muted.
-6. Test automatic bot name + guest click.
-7. If auto-join fails, verify manual guest entry remains usable.
+2. Confirm the bot clicks «Продолжить в браузере», not the native-app action.
+3. Confirm the guest form appears.
+4. Confirm `Секретарь-бот` is entered and «Войти как гость» is clicked.
+5. Confirm isolated Edge/Chrome session and muted bot-browser audio.
+6. If auto-join fails, preserve the visible page and record the exact stopped stage.
 
 ### Browser adapter
 1. Inspect whether the corporate DION version exposes stable explicit participant IDs/names.

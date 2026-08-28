@@ -31,9 +31,10 @@ dion-secretary-bot/apply_070.py
 dion-hardening/apply_071.py
 dion-visual/apply_080.py
 dion-guest-bot/apply_090.py
+dion-browser-gate/apply_091.py
 ```
 
-Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9`.
+Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1`.
 
 ## Reconstructed application
 - `run.py` — startup, crash handlers, freeze support, portable self-test.
@@ -43,7 +44,7 @@ Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9`.
 - `app/speakers.py` — isolated sherpa-onnx diarization/overlap/embeddings.
 - `app/speaker_profiles.py` — opt-in cross-meeting Voice ID, Windows DPAPI, conservative matching.
 - `app/dion_api.py` — optional DION IAPI HTTPS/token/mTLS client; legacy event-id paths plus `list_event_users_by_slug()` metadata path.
-- `app/dion_bot.py` — `DionRoomLink`, `parse_dion_join_url()`, `SecretaryBotController.prepare_guest()`, `DionBrowserAdapter`, `GuestBrowserSession`, `launch_guest_room()`, guest-profile cleanup and legacy API-invite compatibility.
+- `app/dion_bot.py` — `DionRoomLink`, `parse_dion_join_url()`, `SecretaryBotController.prepare_guest()`, two-stage corporate browser gate handling in `DionBrowserAdapter`, `GuestBrowserSession`, `launch_guest_room()`, guest-profile cleanup and legacy API-invite compatibility.
 - `app/storage.py` — transcript/autosave/export/aliases.
 - `app/protocol.py` — deterministic decisions/tasks/questions.
 - `app/local_ai.py` — optional localhost-only protocol wording refinement.
