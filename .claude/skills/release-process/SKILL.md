@@ -15,6 +15,24 @@ Produce a reproducible Windows release that is tested before publication and who
 4. Read `../../../docs/PROJECT_MAP.md` for physical build layout.
 5. Confirm whether the target version is only a candidate or already published.
 
+## Current published baseline
+
+```text
+Version: 0.9 Guest Secretary Bot
+Tag: v0.9-guest-secretary-bot
+EXE: DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
+Size: 627,722,376 bytes
+SHA-256: 3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22
+Target commit: f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6
+Rollback: v0.8-visual-refresh
+```
+
+Validation references:
+- PR Windows CI `33150603611` passed through packaged self-test; Release step skipped by design.
+- Production Windows CI `33150927129` passed through GitHub Release publication.
+
+Corporate DION/WASAPI/browser-DOM behavior remains field-validation evidence, not a CI claim.
+
 ## Current build path
 
 ```text
@@ -35,54 +53,47 @@ dion-portable parts
  -> GitHub Release only on qualifying dion-exe-build push
 ```
 
-## 0.9 candidate identity
-Until actually published:
-
-```text
-Version: 0.9 Guest Secretary Bot
-Planned tag: v0.9-guest-secretary-bot
-Planned EXE: DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
-Published fallback: v0.8-visual-refresh
-```
-
-Never invent size/SHA for the planned artifact.
-
-## Required validation
+## Required validation for future releases
 - Reconstruct source in patch order.
 - Run `python -m compileall` and `python -m pytest -q`.
 - Preserve shared PortAudio safety checks.
 - Validate exact dependency lock and `pip check`.
-- Validate 0.9 guest UI source markers and version values.
+- Validate affected UI/source markers and version values.
 - Qt smoke must construct/close `MainWindow` offscreen.
-- Verify Guest Bot room URL is primary and API fields are advanced/optional.
 - Verify pinned model hashes/revision.
 - Build the exact versioned EXE.
 - Run packaged `--portable-selftest` on Windows.
 - PR build must not publish.
 - Do not merge/release if required checks fail.
 
-## 0.9-specific checks
-Validate at minimum:
-- `/join/<slug>` parser exists and supports corporate hostname;
+## 0.9 invariants that future releases must preserve unless explicitly changed
+- `/join/<slug>` supports corporate/on-prem hostname;
 - normal guest flow does not require token/mTLS/event_id;
-- `dion_event_id_edit` is not reintroduced as primary UI;
-- `dion_api_base_edit` exists in advanced settings;
-- browser DevTools address stays `127.0.0.1`;
+- `dion_event_id_edit` is not primary UI;
+- optional `dion_api_base_edit` remains advanced configuration;
+- browser DevTools stays bound to `127.0.0.1`;
 - auto guest entry has a visible manual fallback;
 - slug IAPI results do not claim `is_active=true` without evidence;
-- speaker probe does not rely on CSS color/generic text/mic-enabled state;
-- `websocket-client==1.8.0` is in the exact lock when browser adapter ships.
+- speaker probe does not rely on CSS color, generic text or microphone-enabled state;
+- `websocket-client==1.8.0` remains locked while the current browser adapter ships.
+
+## Candidate rules
+For a future unreleased version:
+- clearly label it candidate/unreleased;
+- never invent artifact size/SHA;
+- do not overwrite the current published tag/asset;
+- keep the last published fallback explicit until the new Release actually exists.
 
 ## Artifact rules
 After **actual publication**:
 1. read the GitHub Release API, not a planned path;
-2. calculate/confirm SHA-256 of the actual uploaded EXE;
-3. record artifact name, size, target commit and SHA in `../../../docs/RELEASES.md`;
+2. confirm SHA-256, size, target commit and uploaded asset state;
+3. record exact artifact facts in `../../../docs/RELEASES.md`;
 4. append a new **released** entry to `../../../docs/VERSION_JOURNAL.md` rather than rewriting the earlier implemented/unreleased entry;
-5. update `../../../CHANGELOG.md` status/artifact block;
-6. update `../../../docs/ROADMAP.md` and `exec-plans/CURRENT.md`;
-7. update README/AGENTS/CLAUDE current-published status;
-8. distinguish CI validation from corporate DION field validation.
+5. update `../../../CHANGELOG.md`;
+6. update `../../../docs/ROADMAP.md` and `../../../docs/exec-plans/CURRENT.md`;
+7. update README/AGENTS/CLAUDE and AI handoff status;
+8. distinguish CI validation from field validation.
 
 Published tags/assets are immutable. Never use `--clobber` to replace a production binary; bump the version/tag.
 
@@ -90,17 +101,15 @@ Published tags/assets are immutable. Never use `--clobber` to replace a producti
 Do not silently substitute Whisper `base` for `small` in the current Quality line. Any model-profile change requires explicit version/profile naming, tests and documentation.
 
 ## Browser/dependency rule
-0.9 browser automation uses installed Edge/Chrome and local DevTools; do not bundle a second Chromium without an explicit architecture/release decision.
-
-Do not introduce a network/cloud dependency merely to automate guest entry. Browser DevTools communication remains loopback-only.
+The current browser automation uses installed Edge/Chrome and local DevTools. Do not bundle a second Chromium or introduce a cloud/network dependency merely to automate guest entry without an explicit architecture/release decision.
 
 ## Security rule
-Do not embed credentials, room URLs, participant data or real meeting content in workflow artifacts. Bundled application runtime must not require cloud STT.
+Do not embed credentials, room URLs, participant data or real meeting content in workflow artifacts. Bundled runtime must not require cloud STT.
 
 ## Final checks
-- GitHub Release exists before calling the version released.
+- GitHub Release exists before calling a version released.
 - Asset state is uploaded.
 - Release notes and `docs/RELEASES.md` agree with Release API.
-- `VERSION_JOURNAL.md` has both prior implementation history and final release facts without deleting accepted entries.
+- `VERSION_JOURNAL.md` preserves implementation history and final release facts.
 - `CHANGELOG.md`, `ROADMAP.md`, `CURRENT.md`, README and AI adapters show the correct published/candidate distinction.
 - Documentation policy is satisfied.
