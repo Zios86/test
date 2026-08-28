@@ -16,6 +16,7 @@ dion-portable/part* -> base source
   -> dion-hardening/apply_071.py
   -> dion-visual/apply_080.py
   -> dion-guest-bot/apply_090.py
+  -> dion-browser-gate/apply_091.py
   -> compileall + tests
   -> Qt offscreen MainWindow smoke
   -> pinned/verified offline models
@@ -32,11 +33,13 @@ Canonical command:
 python -m pytest -q
 ```
 
-0.9 reconstructed source baseline:
+0.9.1 reconstructed source baseline:
 ```text
-36/36 tests passed
+37/37 tests passed
 compileall passed
 ```
+
+The 0.9.1 regression test covers the observed corporate two-stage sequence: «Продолжить в браузере» followed by guest-name entry and «Войти как гость».
 
 Important 0.9 coverage includes corporate/on-prem `/join/<slug>` parsing, no-token guest mode, slug-IAPI semantics, visible browser fallback, guest-submit state without false room-presence claims and primary/advanced UI hierarchy.
 
