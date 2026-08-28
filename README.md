@@ -2,22 +2,21 @@
 
 Windows-приложение для локальной стенографии ВКС DION, подготовки протокола, интеграции с DION и диагностики качества аудио/распознавания.
 
-Текущая **опубликованная** версия: **0.8 Visual Refresh**.
-
-Текущая **ветка разработки**: **0.9 Guest Secretary Bot** (`dion-guest-bot-0.9`). 0.9 реализована и локально протестирована, но ещё не считается опубликованным Release до прохождения Windows PR CI, merge, production build и GitHub Release.
+Текущая **опубликованная** версия: **0.9 Guest Secretary Bot**.
 
 ## Для человека
 
 ### Опубликованный релиз
 
-- Release: `v0.8-visual-refresh`.
-- Portable EXE: `DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
-- Release page: `https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`.
-- Direct download: `https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
-- Size: `627,541,530 bytes`.
-- SHA-256: `0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`.
+- Release: `v0.9-guest-secretary-bot`.
+- Portable EXE: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
+- Release page: `https://github.com/Zios86/test/releases/tag/v0.9-guest-secretary-bot`.
+- Direct download: `https://github.com/Zios86/test/releases/download/v0.9-guest-secretary-bot/DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
+- Size: `627,722,376 bytes`.
+- SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`.
+- Target commit: `f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6`.
 
-### Что меняется в 0.9
+### Что нового в 0.9
 
 Основной пользовательский сценарий DION упрощён:
 
@@ -38,14 +37,14 @@ https://корпоративный-dion/join/room-slug
 - Из `/join/<slug>` автоматически извлекается slug конференции.
 - Поддерживаются корпоративные/on-prem DION host names, включая URL не на `dion.vc`.
 - Integration API, token и mTLS остаются **необязательными расширенными настройками** для дополнительных метаданных.
-- API base URL теперь настраивается для корпоративного deployment.
+- API base URL настраивается для корпоративного deployment.
 - При наличии IAPI участники могут запрашиваться по slug; этот результат **не считается доказательством текущего присутствия** пользователя в комнате.
 - Добавлен best-effort localhost-only browser adapter для гостевого входа и чтения только явных participant/speaking DOM/ARIA-сигналов.
 - Программа не угадывает активного спикера по цвету, обычному тексту страницы или состоянию «микрофон включён».
 - Browser active-speaker пока служит live-индикатором и не переподписывает задержанные Whisper chunks до полевой калибровки времени.
 - Основной звук для STT по-прежнему берётся через Windows WASAPI Loopback; отдельный per-user DION media stream не заявляется.
 
-0.8 visual shell и 0.7.1 hardening сохраняются: offline Whisper `small`, shared PortAudio, mTLS privacy rules, opt-in diarization, DPAPI voice profiles.
+0.8 visual shell и 0.7.1 hardening сохранены: offline Whisper `small`, shared PortAudio, mTLS privacy rules, opt-in diarization, DPAPI voice profiles.
 
 ## Для Claude, ChatGPT, Codex и других ИИ
 
@@ -84,21 +83,25 @@ https://корпоративный-dion/join/room-slug
 - `docs/design-docs/SPEECH_RECOGNITION.md` — Whisper/VAD/context;
 - `docs/design-docs/PRIVACY_SECURITY.md` — secrets, guest profile, DevTools, voice profiles;
 - `docs/VERSION_JOURNAL.md` — append-only engineering history;
-- `docs/RELEASES.md` — только фактически опубликованные binaries;
+- `docs/RELEASES.md` — фактически опубликованные binaries;
 - `docs/ROADMAP.md` — направление;
 - `docs/exec-plans/CURRENT.md` — активный план;
 - `CHANGELOG.md` — user-visible history.
 
 ## Validation status 0.9
 
-На чистом восстановленном source 0.8 после применения `apply_090.py`:
+Reconstructed source + 0.9 patch прошёл локально:
 
 ```text
 36/36 tests passed
 compileall passed
 ```
 
-Это **не** означает, что 0.9 уже прошла Windows PR CI или реальную корпоративную DION field validation. До Release должны пройти Windows Qt smoke, pinned models, PyInstaller, packaged `--portable-selftest`, merge и production publication.
+Windows PR CI `33150603611` успешно прошёл tests, pinned models, PyInstaller build и packaged `--portable-selftest`; Release step был пропущен как и должен быть в PR.
+
+Production Windows CI `33150927129` повторно прошёл tests, pinned models, EXE build, packaged self-test и успешно опубликовал `v0.9-guest-secretary-bot`.
+
+CI не доказывает фактическое поведение guest join/DOM active-speaker/WASAPI на корпоративном DION — это остаётся field validation.
 
 ## Репозиторий
 
