@@ -34,11 +34,42 @@
 
 ## Текущая версия
 
-**0.9 Guest Secretary Bot** — текущая development candidate на ветке `dion-guest-bot-0.9`; implemented/tested локально, **не опубликована**.
+**0.9 Guest Secretary Bot** — текущий опубликованный релиз (`v0.9-guest-secretary-bot`).
 
-Текущий опубликованный релиз и основной rollback: **0.8 Visual Refresh**.
+Основной опубликованный rollback: **0.8 Visual Refresh**.
 
 Стабильные резервные точки для отката: **0.8 Visual Refresh**, **0.7.1 Hardening**, **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+
+---
+
+## 2026-08-28.05 — v0.9 Guest Secretary Bot опубликован
+
+- Версия/ветка: `v0.9-guest-secretary-bot`, `dion-exe-build`
+- Тип: `release`, `build`, `docs`
+- Статус: `released`
+- Цель: зафиксировать фактический выпуск реализации 0.9, описанной в записи `2026-08-28.04`, после успешных Windows PR и production gates.
+
+### Проверка
+
+- PR #4 Windows CI `33150603611` — success: source validation, pinned offline models, PyInstaller build и packaged `--portable-selftest`; Release step skipped by design.
+- Merge commit: `f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6`.
+- Production Windows CI `33150927129` — success: tests, pinned models, EXE build, packaged self-test и GitHub Release publication.
+
+### Release/артефакт
+
+- Release: `https://github.com/Zios86/test/releases/tag/v0.9-guest-secretary-bot`
+- Artifact: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`
+- Размер: `627,722,376 bytes`
+- SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`
+- Target commit: `f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6`
+
+### Ограничения/риски
+
+Release/CI не доказывает реальную корпоративную DION guest-form/DOM совместимость, waiting-room behavior, browser active-speaker semantics, browser↔WASAPI timing или длительную стабильность реального аудио. Основной STT media source остаётся Windows WASAPI Loopback.
+
+### Откат
+
+Основной опубликованный rollback: `v0.8-visual-refresh`.
 
 ---
 
