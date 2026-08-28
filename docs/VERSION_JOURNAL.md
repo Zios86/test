@@ -34,11 +34,126 @@
 
 ## Текущая версия
 
-**0.7.1 Hardening** — текущий опубликованный релиз.
+**0.8 Visual Refresh** — текущий опубликованный релиз.
 
-Предыдущий релиз: **0.7 Secretary Bot**.
+Предыдущий релиз и основной rollback: **0.7.1 Hardening**.
 
-Стабильные резервные точки для отката: **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+Стабильные резервные точки для отката: **0.7.1 Hardening**, **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+
+---
+
+## 2026-08-28.03 — v0.8 Visual Refresh опубликован
+
+- Версия/ветка: `v0.8-visual-refresh`, `dion-exe-build`
+- Тип: `feature`, `fix`, `build`, `docs`, `release`
+- Статус: `released`
+- Цель: применить одобренный современный дизайн непосредственно к Windows-приложению, сохранив hardening/аудио/STT/DION-инварианты 0.7.1, и выпустить проверенный portable EXE.
+
+### Изменения
+
+- старый утилитарный single-screen UI заменён native PySide6/QSS оболочкой;
+- добавлена левая навигация из семи страниц: Встреча, Стенограмма, Протокол, Участники, Секретарь-бот, Диагностика, Настройки;
+- live transcript переведён на `TranscriptCardView` с карточками спикеров;
+- активный спикер получает состояние `Говорит`, overlap/interruption — отдельное состояние `Перебивание`;
+- добавлена верхняя live-status панель для встречи/записи/аудио/DION;
+- добавлена правая summary rail: участники, активный спикер, качество аудио, черновик протокола, горячие слова;
+- добавлена постоянная нижняя панель Start/Stop/DOCX/Protocol;
+- сохранены pause, decision/task markers, DION/mTLS, Voice ID, diagnostics и recognition settings;
+- добавлен canonical design doc `docs/design-docs/UI_VISUAL_SYSTEM.md`;
+- в release workflow добавлен Qt `offscreen` smoke-test, который реально создаёт/закрывает новый `MainWindow` на Windows runner;
+- в цепочку release-патчей добавлен `dion-visual/apply_080.py`;
+- исправлен release-existence guard: ожидаемый exit code `1` от `gh release view` при отсутствии релиза больше не прерывает PowerShell раньше проверки `$LASTEXITCODE`.
+
+### Изменённые компоненты
+
+- `dion-visual/apply_080.py` и multipart payload;
+- логические `app/ui.py`, `app/health.py`, `app/__init__.py`;
+- `tests/test_visual_refresh.py`;
+- `.github/workflows/build-dion-portable.yml`;
+- `docs/design-docs/UI_VISUAL_SYSTEM.md`;
+- canonical release/project/AI navigation docs.
+
+### Проверка
+
+Локальный visual-refresh workspace:
+
+```text
+48/48 tests passed
+compileall passed
+```
+
+Первичный Visual Refresh PR:
+
+```text
+run 33129215245 — success
+```
+
+Прошли source checks, Qt offscreen `MainWindow` smoke, pinned-model validation, PyInstaller EXE build и packaged `--portable-selftest`; Release step был пропущен как и должен быть в PR.
+
+Первый production run после merge:
+
+```text
+run 33129501062 — failure only at Release publication guard
+```
+
+При этом source validation, Qt smoke, models, EXE build и packaged self-test были успешны. Причина: `$PSNativeCommandUseErrorActionPreference = $true` превратил ожидаемый non-zero результат `gh release view` для несуществующего тега в исключение раньше guard-логики.
+
+Workflow-only исправление прошло PR #3:
+
+```text
+run 33145190036 — success
+```
+
+Финальный production run:
+
+```text
+run 33145419554 — success
+```
+
+Успешно прошли source checks, Qt smoke, pinned models, EXE build, packaged self-test, Release publication и Actions artifact upload.
+
+Примечание о тестах: локальный workspace имел 48 тестов; reconstructed Windows release workflow в логах финальной линии обнаруживает 29 pytest tests. Эти два набора не следует молча считать одним и тем же.
+
+### Release/артефакт
+
+Release:
+
+`https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`
+
+Artifact:
+
+`DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`
+
+Размер:
+
+`627,541,530 bytes`
+
+SHA-256:
+
+`0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`
+
+Target commit:
+
+`b7ee9bb5017348a83b99e48246a65c5309d35315`
+
+### Ограничения/риски
+
+CI/self-test не доказывают:
+
+- точное соответствие UI ожиданиям на пользовательском Windows-мониторе, DPI/scaling и разрешении;
+- удобство интерфейса в длительной рабочей встрече;
+- реальную авторизацию в корпоративном DION с production mTLS;
+- фактический Secretary Bot lifecycle в корпоративной комнате;
+- длительную стабильность WASAPI + microphone на целевом АРМ;
+- качество speaker attribution/overlap и фактическую WER/CER русской речи.
+
+### Откат
+
+При визуальной/навигационной регрессии — `v0.7.1`.
+
+При регрессии DION/Voice ID — `v0.7-secretary-bot`.
+
+При необходимости отката интеграционной линии — `v0.6-quality`.
 
 ---
 
