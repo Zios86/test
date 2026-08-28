@@ -17,6 +17,7 @@ dion-portable/part* -> base source
   -> dion-visual/apply_080.py
   -> dion-guest-bot/apply_090.py
   -> dion-browser-gate/apply_091.py
+  -> dion-postprocess/apply_100.py
   -> compileall + tests
   -> Qt offscreen MainWindow smoke
   -> pinned/verified offline models
@@ -33,11 +34,13 @@ Canonical command:
 python -m pytest -q
 ```
 
-0.9.1 reconstructed source baseline:
+1.0 reconstructed source baseline:
 ```text
-37/37 tests passed
+42/42 tests passed
 compileall passed
 ```
+
+The five 1.0 tests cover private endpoint validation, public/hostname rejection, package contents, missing-audio failure and ZIP traversal rejection. Release CI also packages `postprocess-server/` as `DION_Postprocess_Server_1.0.zip`; the heavy model is downloaded by faster-whisper on first server use and is not embedded in that ZIP.
 
 The 0.9.1 regression test covers the observed corporate two-stage sequence: «Продолжить в браузере» followed by guest-name entry and «Войти как гость».
 
