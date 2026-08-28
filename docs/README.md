@@ -20,6 +20,7 @@
 - `RELEASES.md` — actually published binaries and hashes.
 
 ## Design docs
+- `design-docs/UI_VISUAL_SYSTEM.md` — canonical 0.8 UI/visual system, layout, tokens and transcript-card states.
 - `design-docs/SPEECH_RECOGNITION.md` — Whisper/VAD/context/word timestamps.
 - `design-docs/AUDIO_STABILITY.md` — WASAPI/PortAudio/startup safety.
 - `design-docs/SPEAKER_IDENTIFICATION.md` — diarization, Voice ID, overlap, confidence.
@@ -32,4 +33,4 @@
 AI-specific files `AGENTS.md`, `CLAUDE.md` and `.claude/skills/*` are adapters/procedures, not duplicate knowledge bases.
 
 ## Current documentation baseline
-The canonical docs describe the published **0.7.1 Hardening** release and its predecessor **0.7 Secretary Bot**. Exact artifact names, sizes and SHA-256 values must be taken from `RELEASES.md`. Windows/DION field validation must not be inferred from CI success; the remaining field-test scope is maintained in `exec-plans/CURRENT.md` and `ROADMAP.md`.
+The canonical docs describe the published **0.8 Visual Refresh** release, with **0.7.1 Hardening** retained as the immediate rollback point. Exact artifact names, sizes and SHA-256 values must be taken from `RELEASES.md`. Windows/DION and target-display usability field validation must not be inferred from CI success; the remaining field-test scope is maintained in `exec-plans/CURRENT.md` and `ROADMAP.md`.
