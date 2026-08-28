@@ -175,7 +175,7 @@ jobs:
           Get-FileHash ".\DION_Postprocess_Server_1.0.1.zip" -Algorithm SHA256
 
       - name: Publish immutable GitHub Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dion-exe-build'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/dion-exe-build'
         working-directory: src
         shell: pwsh
         env:
