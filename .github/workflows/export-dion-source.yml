@@ -1,0 +1,56 @@
+name: Export reconstructed DION source
+
+on:
+  push:
+    branches:
+      - dion-guest-bot-0.9
+    paths:
+      - '.github/workflows/export-dion-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Reconstruct 0.8 source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          $parts = @(
+            "dion-portable/part00",
+            "dion-portable/part01",
+            "dion-portable/part02_03",
+            "dion-portable/part04_05",
+            "dion-portable/part06_07",
+            "dion-portable/part08_09",
+            "dion-portable/part10_11",
+            "dion-portable/part12_13",
+            "dion-portable/part14"
+          )
+          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ""
+          [IO.File]::WriteAllBytes("source.zip", [Convert]::FromBase64String($b64))
+          $hash = (Get-FileHash "source.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne "48feb8875f9c94a160621eaefecc98d3246e8580c5db9c9efa347abe9b5f5ff1") { throw "Source checksum mismatch: $hash" }
+          New-Item -ItemType Directory -Force src | Out-Null
+          Expand-Archive source.zip src -Force
+          python dion-hotfix/apply_051.py src
+          python dion-quality/apply_060.py
+          python dion-secretary-bot/apply_070.py src
+          python dion-hardening/apply_071.py src
+          python dion-visual/apply_080.py src
+          python -m compileall -q src/app src/run.py
+          Compress-Archive -Path src\* -DestinationPath reconstructed-0.8-source.zip -Force
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reconstructed-0.8-source
+          path: reconstructed-0.8-source.zip
+          compression-level: 0
+          if-no-files-found: error
