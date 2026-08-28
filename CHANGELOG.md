@@ -2,6 +2,16 @@
 
 All notable user-visible changes to DION Meeting Assistant are recorded here.
 
+## 1.0 Post-meeting Precision — release validation pending
+
+- Added continuous, separate WAV recording for system audio and microphone while live transcription continues.
+- Added an explicit post-meeting action that packages the original draft transcript and audio without modifying either source.
+- Added authenticated private-LAN streaming upload, job progress polling and safe result download.
+- Added a Windows server package for faster-whisper `large-v3-turbo` retranscription and conservative local Ollama correction.
+- Results include precise JSON, corrected TXT and a comparison/review report; Ollama failure falls back to raw precise recognition.
+- Public/hostname endpoints are rejected by the client; the server requires a token and an allowed client IP in network mode.
+- Added five regression/security tests; reconstructed source passes 42 tests.
+
 ## 0.9.1 Browser Gate Hotfix — unreleased
 
 - Added automatic handling of the corporate DION «Переход в Конференции» page.
