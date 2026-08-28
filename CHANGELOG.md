@@ -2,6 +2,40 @@
 
 All notable user-visible changes to DION Meeting Assistant are recorded here.
 
+## 0.8 Visual Refresh — 2026-08-28
+
+### Interface
+- Replaced the utility-style single screen with a modern native PySide6/QSS application shell.
+- Added left navigation: Встреча, Стенограмма, Протокол, Участники, Секретарь-бот, Диагностика, Настройки.
+- Live transcript now uses readable speaker cards with timestamp, speaker identity and state styling.
+- Current speaker receives a blue `Говорит` state; overlapping speech receives a separate `Перебивание` danger state.
+- Added top live-status bar for meeting/recording/audio/DION state.
+- Added right summary rail for participants, active speaker, audio quality, protocol draft and hotwords.
+- Added persistent bottom actions for start/stop, DOCX export and protocol access.
+- Added a dedicated Secretary Bot visual status card and dedicated settings/participants pages.
+- Existing pause, decision/task markers, DION/mTLS, Voice ID, diagnostics and recognition settings were preserved and redistributed rather than removed.
+
+### Design system
+- Added canonical `docs/design-docs/UI_VISUAL_SYSTEM.md` with palette, typography, navigation, card states, spacing and accessibility rules.
+- Approved generated concept images remain design references; the shipping UI is native Qt widgets/QSS, not a rasterized mockup.
+
+### Build / validation
+- Added `dion-visual/apply_080.py` after the 0.7.1 hardening patch in the release chain.
+- Added Windows Qt `offscreen` `MainWindow` construction smoke-test before packaging.
+- Local visual-refresh workspace: **48/48 tests passed** and compileall passed.
+- Windows PR CI `33129215245` passed source checks, Qt smoke, pinned models, EXE build and packaged self-test.
+- Initial production run `33129501062` passed through EXE/self-test but failed only because strict PowerShell handling treated the expected non-zero `gh release view` result as fatal.
+- PR #3 fixed the release-existence guard; validation run `33145190036` passed.
+- Final production CI `33145419554` passed all gates and published the release.
+
+### Published artifact
+- Release: `v0.8-visual-refresh`
+- `DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`
+- Size: `627,541,530 bytes`
+- SHA-256: `0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`
+
+Field visual/usability testing on the target Windows workstation and real corporate DION validation remain required.
+
 ## 0.7.1 Hardening — 2026-08-28
 
 ### Security / DION
