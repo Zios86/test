@@ -1,11 +1,9 @@
 # AI handoff: Claude + ChatGPT Work + Codex
 
 ## Goal
-
 Один проект должен одинаково продолжаться в разных ИИ без копирования всей истории чатов и без расхождения документации.
 
 ## Canonical model
-
 Repository files are authoritative:
 
 ```text
@@ -18,69 +16,91 @@ docs/              -> shared canonical project knowledge
 
 Do not treat a chat transcript as the only place where an important decision exists.
 
-## Claude Code start protocol
+## Current handoff status
 
-1. Open repository/branch.
-2. Claude automatically receives `CLAUDE.md` in supported Claude Code workflows.
-3. Read `docs/PROJECT_MAP.md`.
-4. If a matching project Skill exists, use it.
-5. Load only the referenced design/development files needed for the task.
+- Published release: **0.8 Visual Refresh**.
+- Active development branch: `dion-guest-bot-0.9`.
+- Development candidate: **0.9 Guest Secretary Bot**.
+- 0.9 reconstructed source validation: **36/36 tests + compileall passed**.
+- Windows PR CI / packaged EXE / production Release: not yet recorded as complete.
 
-## OpenAI Codex start protocol
+Any AI continuing 0.9 must not call it released until `docs/RELEASES.md` contains the actual uploaded artifact metadata.
 
-1. Open the repository/branch.
-2. Read root `AGENTS.md`.
-3. Read `docs/PROJECT_MAP.md`.
-4. Follow links only to the relevant design/development document.
-5. Run the validation commands listed in `AGENTS.md`/`DEVELOPMENT.md` after changes.
-
-## ChatGPT Work / Projects protocol
-
-OpenAI currently separates Work and Codex by use case: Work is appropriate for long multi-step research/artifact work, while Codex is dedicated to software-development work.
-
-When using ChatGPT Work or a ChatGPT Project for this repository:
-
-- keep the repository/docs as the source of truth;
-- add the current repo documentation as project context when practical;
-- project instructions should say to read `AGENTS.md` and `docs/PROJECT_MAP.md` first;
-- do not paste and maintain a second copy of architecture/roadmap in Project instructions;
-- use Work for reports, plans, documentation artifacts and cross-tool workflows;
-- use Codex/repository tools for source changes, tests and releases.
-
-Suggested Project instruction:
+## 0.9 decision that must survive AI handoff
+The normal DION user flow is now:
 
 ```text
-DION Meeting Assistant is maintained from its repository documentation.
-Treat docs/ as the canonical knowledge base.
-Before project work, read AGENTS.md and docs/PROJECT_MAP.md, then only the relevant design doc.
-For every change, update documentation according to docs/DOCUMENTATION_POLICY.md.
-Do not rely on chat memory when it conflicts with repository documentation.
+room URL /join/<slug>
+  -> guest Secretary Bot
+  -> visible Edge/Chrome guest session
+  -> optional localhost DevTools automation/probe
+```
+
+Integration API is optional/advanced. `event_id` must not be reintroduced as a mandatory common-path input.
+
+Key safety rules:
+- corporate/on-prem DION hostnames are supported;
+- browser automation failure falls back to manual guest entry;
+- slug IAPI metadata is not live-presence proof;
+- microphone enabled is not speaker evidence;
+- browser speaker state is not yet used to relabel delayed Whisper chunks without timing calibration;
+- STT audio remains WASAPI in 0.9.
+
+## Claude Code start protocol
+1. Open repository/branch.
+2. Read `CLAUDE.md`.
+3. Read `docs/PROJECT_MAP.md`.
+4. For 0.9 guest/browser work read `docs/design-docs/DION_INTEGRATION.md` and `PRIVACY_SECURITY.md`.
+5. If a matching Skill exists, use it.
+6. Load only mapped files needed for the task.
+
+## OpenAI Codex start protocol
+1. Open repository/branch.
+2. Read root `AGENTS.md`.
+3. Read `docs/PROJECT_MAP.md`.
+4. Follow only relevant design/development links.
+5. Run validation commands from `DEVELOPMENT.md` after changes.
+
+## ChatGPT Work / Projects protocol
+When using ChatGPT Work/Projects:
+- keep repository/docs as source of truth;
+- project instructions should point to `AGENTS.md` + `docs/PROJECT_MAP.md`;
+- do not maintain a second architecture/roadmap copy in Project instructions;
+- use Work for reports/plans/docs and repository tooling for code/tests/releases.
+
+Suggested project instruction:
+
+```text
+DION Meeting Assistant is maintained from repository documentation.
+Treat docs/ as canonical. Read AGENTS.md and docs/PROJECT_MAP.md first.
+For significant changes update docs/VERSION_JOURNAL.md and affected docs.
+Do not treat unreleased 0.9 work as a published Release until RELEASES.md has actual artifact metadata.
 ```
 
 ## Skill portability
-
-The project stores Claude Code project skills under `.claude/skills/` because that is Claude's project discovery location.
-
-The `SKILL.md` files themselves are intentionally written as portable procedural playbooks: name/description, required context, steps and final checks. They can be adapted/uploaded to ChatGPT Skills when needed without rewriting project facts, because the factual source remains `docs/`.
-
-Do not make a separate `SKILL.md` containing a duplicate architecture snapshot for each AI product.
+`.claude/skills/` contains procedural playbooks, not duplicate project facts. Facts stay under `docs/` so the same source works for Claude, ChatGPT/Codex and humans.
 
 ## Handoff at the end of a task
-
-Before moving from one AI to another, ensure the repository contains:
-
+Before switching AI/system, ensure repository contains:
 - current `PROJECT_MAP.md`;
-- current architecture/design docs;
-- `CHANGELOG.md` entry for user-visible changes;
-- current `ROADMAP.md`;
-- updated `exec-plans/CURRENT.md` if work remains;
-- exact test/build status in the active plan or commit/release notes;
-- unresolved issue/limitation written explicitly.
+- architecture/design docs matching code;
+- `CHANGELOG.md` user-visible changes;
+- `ROADMAP.md` and `exec-plans/CURRENT.md` status;
+- `VERSION_JOURNAL.md` entry for every significant update;
+- exact tests/build status;
+- explicit unresolved limitations;
+- release metadata only when actually published.
 
-Then the next AI should be able to continue from repository files alone.
+For 0.9 specifically record whether each of these is still pending or complete:
+- Windows PR CI;
+- Qt guest-flow smoke;
+- packaged EXE self-test;
+- merge;
+- production CI;
+- GitHub Release;
+- real corporate DION guest-form/DOM field check.
 
 ## What belongs where
-
 | Information | File |
 |---|---|
 | Permanent architecture | `ARCHITECTURE.md` / `design-docs/*` |
@@ -88,27 +108,29 @@ Then the next AI should be able to continue from repository files alone.
 | Build/test commands | `DEVELOPMENT.md` |
 | Current next steps | `ROADMAP.md`, `exec-plans/CURRENT.md` |
 | User-visible history | `CHANGELOG.md` |
-| Release artifacts | `RELEASES.md` |
+| Published artifacts | `RELEASES.md` |
+| Chronological engineering work | `VERSION_JOURNAL.md` |
 | Claude workflow instructions | `CLAUDE.md`, `.claude/skills/*` |
 | Codex workflow instructions | `AGENTS.md` |
-| Temporary brainstorming | chat, until a decision is made |
+| Temporary brainstorming | chat until promoted into docs |
 
 ## Decision promotion rule
+Once a chat discussion changes how the project should work, promote the stable result into repository documentation before ending the task.
 
-Once a chat discussion changes how the project should work, promote the stable result into the appropriate repository document **before ending the task**.
-
-Example:
+0.9 example:
 
 ```text
-Chat: "Whisper base is too inaccurate; use small."
+Chat: "В комнату можно зайти как гость по обычной ссылке"
     ↓
-Implementation/test
+Implementation/tests
     ↓
-design-docs/SPEECH_RECOGNITION.md
+DION_INTEGRATION.md
+ARCHITECTURE.md
+PROJECT_MAP.md
 CHANGELOG.md
-RELEASES.md (when published)
+VERSION_JOURNAL.md
+ROADMAP/CURRENT
 ```
 
 ## Privacy
-
-Do not copy real meeting transcripts, names, internal tickets or sensitive corporate content into permanent project documentation unless explicitly required and sanitized. Use synthetic examples.
+Do not copy real meeting links, transcripts, names, internal tickets, tokens, certificates or private keys into permanent documentation. Use synthetic examples.

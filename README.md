@@ -2,21 +2,50 @@
 
 Windows-приложение для локальной стенографии ВКС DION, подготовки протокола, интеграции с DION и диагностики качества аудио/распознавания.
 
-Текущая опубликованная версия: **0.8 Visual Refresh**.
+Текущая **опубликованная** версия: **0.8 Visual Refresh**.
+
+Текущая **ветка разработки**: **0.9 Guest Secretary Bot** (`dion-guest-bot-0.9`). 0.9 реализована и локально протестирована, но ещё не считается опубликованным Release до прохождения Windows PR CI, merge, production build и GitHub Release.
 
 ## Для человека
 
-- Последний релиз: `v0.8-visual-refresh`.
+### Опубликованный релиз
+
+- Release: `v0.8-visual-refresh`.
 - Portable EXE: `DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
-- Release: `https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`.
-- Прямая загрузка: `https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
-- Размер: `627,541,530 bytes`.
+- Release page: `https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`.
+- Direct download: `https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
+- Size: `627,541,530 bytes`.
 - SHA-256: `0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`.
-- Portable EXE содержит offline Whisper `small`; облачный STT не требуется.
-- Основной режим: системный звук Windows через WASAPI Loopback + отдельный микрофон пользователя.
-- 0.8 переносит одобренный современный интерфейс в native PySide6/QSS: левая навигация, карточки стенограммы, верхняя статус-панель, правая сводка и нижняя панель быстрых действий.
-- Hardening 0.7.1 сохранён: DION mTLS, opt-in diarization, active-only Voice ID, DPAPI-защита persistent voice profiles, Secretary Bot lifecycle hardening.
-- Корпоративная DION/mTLS/WASAPI и визуальная проверка на целевом АРМ остаются отдельным полевым этапом и не считаются доказанными только по CI.
+
+### Что меняется в 0.9
+
+Основной пользовательский сценарий DION упрощён:
+
+```text
+Ссылка на встречу DION
+https://корпоративный-dion/join/room-slug
+        ↓
+Секретарь-бот
+        ↓
+отдельный Edge/Chrome guest profile
+        ↓
+автозаполнение имени / «Войти как гость»
+        ↓
+видимый ручной fallback, если автоматизация недоступна
+```
+
+- `event_id` больше не требуется для обычного гостевого входа.
+- Из `/join/<slug>` автоматически извлекается slug конференции.
+- Поддерживаются корпоративные/on-prem DION host names, включая URL не на `dion.vc`.
+- Integration API, token и mTLS остаются **необязательными расширенными настройками** для дополнительных метаданных.
+- API base URL теперь настраивается для корпоративного deployment.
+- При наличии IAPI участники могут запрашиваться по slug; этот результат **не считается доказательством текущего присутствия** пользователя в комнате.
+- Добавлен best-effort localhost-only browser adapter для гостевого входа и чтения только явных participant/speaking DOM/ARIA-сигналов.
+- Программа не угадывает активного спикера по цвету, обычному тексту страницы или состоянию «микрофон включён».
+- Browser active-speaker пока служит live-индикатором и не переподписывает задержанные Whisper chunks до полевой калибровки времени.
+- Основной звук для STT по-прежнему берётся через Windows WASAPI Loopback; отдельный per-user DION media stream не заявляется.
+
+0.8 visual shell и 0.7.1 hardening сохраняются: offline Whisper `small`, shared PortAudio, mTLS privacy rules, opt-in diarization, DPAPI voice profiles.
 
 ## Для Claude, ChatGPT, Codex и других ИИ
 
@@ -25,66 +54,52 @@ Windows-приложение для локальной стенографии В
 1. Прочитайте `AGENTS.md` или `CLAUDE.md`.
 2. Откройте `docs/PROJECT_MAP.md`.
 3. Проверьте последние релевантные записи `docs/VERSION_JOURNAL.md`.
-4. Затем читайте только документ и модуль, относящиеся к задаче.
-5. После любого значимого изменения обновите документацию по правилам `docs/DOCUMENTATION_POLICY.md`.
+4. Читайте только профильный design/development doc и mapped source files.
+5. После значимого изменения обновите документацию по `docs/DOCUMENTATION_POLICY.md`.
 
-`docs/` является **единой системой истины** для знаний о проекте. AI-специфичные файлы содержат только короткие инструкции и ссылки на эту базу.
+`docs/` — единая система истины; chat history является вторичной.
 
-## Важная особенность release/build-ветки
+## Release/build-ветка
 
-Ветка `dion-exe-build` является release/build-веткой. Базовый исходник восстанавливается из частей в `dion-portable/`, после чего применяются патчи по порядку:
+`dion-exe-build` восстанавливает базовый source и применяет патчи по порядку:
 
-- `dion-hotfix/apply_051.py` — stability fix 0.5.1;
+- `dion-hotfix/apply_051.py` — stability 0.5.1;
 - `dion-quality/apply_060.py` — recognition quality 0.6;
-- `dion-secretary-bot/apply_070.py` — DION Secretary Bot/roster/speaker fallback 0.7;
-- `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/speaker/release hardening 0.7.1;
-- `dion-visual/apply_080.py` — native PySide6 visual refresh 0.8;
-- `.github/workflows/build-dion-portable.yml` — восстановление проекта, применение патчей, locked dependencies, pinned offline models, Qt offscreen smoke-test, PyInstaller, packaged self-test и публикация Release.
+- `dion-secretary-bot/apply_070.py` — Secretary Bot/IAPI/speaker fallback 0.7;
+- `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/release hardening 0.7.1;
+- `dion-visual/apply_080.py` — native PySide6 Visual Refresh 0.8;
+- `dion-guest-bot/apply_090.py` — room-URL-first Guest Secretary Bot 0.9.
 
-Не изучайте `part*` по одному. Логическая карта восстановленного Python-проекта находится в `docs/PROJECT_MAP.md`.
+Не изучайте encoded `part*` по одному. Логическая карта проекта — в `docs/PROJECT_MAP.md`.
 
 ## Документация
 
-- `docs/README.md` — индекс документации;
-- `docs/PROJECT_MAP.md` — куда идти за конкретной функцией;
-- `docs/ARCHITECTURE.md` — архитектура и потоки данных;
-- `docs/DEVELOPMENT.md` — запуск, тесты, зависимости, модели и сборка;
-- `docs/design-docs/UI_VISUAL_SYSTEM.md` — каноническая дизайн-система 0.8;
-- `docs/design-docs/DION_INTEGRATION.md` — DION IAPI/mTLS/Секретарь-бот;
+- `docs/README.md` — индекс;
+- `docs/PROJECT_MAP.md` — карта модулей/маршрутизация;
+- `docs/ARCHITECTURE.md` — runtime/data flow;
+- `docs/DEVELOPMENT.md` — тесты, dependencies, models, CI/release;
+- `docs/design-docs/UI_VISUAL_SYSTEM.md` — UI system 0.8+;
+- `docs/design-docs/DION_INTEGRATION.md` — Guest Bot, browser adapter, optional IAPI/mTLS;
 - `docs/design-docs/SPEAKER_IDENTIFICATION.md` — diarization/Voice ID/overlap;
 - `docs/design-docs/SPEECH_RECOGNITION.md` — Whisper/VAD/context;
-- `docs/design-docs/PRIVACY_SECURITY.md` — секреты, голосовые профили и диагностика;
-- `docs/DOCUMENTATION_POLICY.md` — обязательное обновление документации;
-- `docs/VERSION_JOURNAL.md` — append-only инженерная история;
-- `docs/RELEASES.md` — фактически опубликованные EXE, размеры и SHA-256;
-- `docs/AI_HANDOFF.md` — передача проекта между разными ИИ;
-- `docs/ROADMAP.md` — текущее состояние и следующие шаги;
-- `CHANGELOG.md` — история пользовательских изменений.
+- `docs/design-docs/PRIVACY_SECURITY.md` — secrets, guest profile, DevTools, voice profiles;
+- `docs/VERSION_JOURNAL.md` — append-only engineering history;
+- `docs/RELEASES.md` — только фактически опубликованные binaries;
+- `docs/ROADMAP.md` — направление;
+- `docs/exec-plans/CURRENT.md` — активный план;
+- `CHANGELOG.md` — user-visible history.
 
-## Проверка 0.8
+## Validation status 0.9
 
-Для восстановленного исходника основной тестовый набор:
+На чистом восстановленном source 0.8 после применения `apply_090.py`:
 
-```bash
-python -m pytest -q
+```text
+36/36 tests passed
+compileall passed
 ```
 
-При разработке visual refresh локальный рабочий набор прошёл **48/48 тестов** и `compileall`.
-
-Опубликованный `v0.8-visual-refresh` дополнительно прошёл:
-
-- первоначальный Windows PR CI `33129215245`;
-- release-guard PR CI `33145190036`;
-- финальный production Windows CI `33145419554`;
-- locked dependency validation;
-- pinned offline-model verification;
-- Qt `offscreen` construction smoke-test для нового `MainWindow`;
-- one-file EXE build;
-- packaged `--portable-selftest`;
-- успешную публикацию GitHub Release.
-
-Первый production-run `33129501062` также успешно дошёл до EXE/self-test, но был остановлен ошибкой release-existence guard; этот guard исправлен PR #3 до финальной публикации.
+Это **не** означает, что 0.9 уже прошла Windows PR CI или реальную корпоративную DION field validation. До Release должны пройти Windows Qt smoke, pinned models, PyInstaller, packaged `--portable-selftest`, merge и production publication.
 
 ## Репозиторий
 
-GitHub сейчас сообщает `Zios86/test` как **public**. Если проект должен быть закрытым, visibility необходимо переключить в настройках GitHub; секреты, private keys, токены, реальные стенограммы и данные участников нельзя коммитить независимо от visibility.
+GitHub ранее сообщал `Zios86/test` как `public`. Если проект должен быть закрытым, visibility требуется изменить в настройках GitHub. Токены, private keys, реальные meeting URLs, стенограммы и данные участников нельзя коммитить независимо от visibility.

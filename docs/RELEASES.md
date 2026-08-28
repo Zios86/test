@@ -4,7 +4,46 @@ This file records published artifacts and the engineering meaning of each releas
 
 For chronological engineering history, including unreleased significant updates, use `VERSION_JOURNAL.md`.
 
-## v0.8-visual-refresh — current release
+## 0.9 Guest Secretary Bot — NOT YET RELEASED
+
+Status: **development candidate / unreleased** on branch `dion-guest-bot-0.9`.
+
+Planned identity:
+
+```text
+Tag: v0.9-guest-secretary-bot
+Artifact: DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
+```
+
+Implemented candidate behavior:
+- ordinary HTTPS `/join/<slug>` room URL is the primary Guest Bot input;
+- corporate/on-prem DION hostnames are supported;
+- normal guest entry does not require `event_id`, token or mTLS;
+- isolated Edge/Chrome guest session with muted browser audio;
+- localhost-only DevTools best-effort guest-name fill/click with visible manual fallback;
+- optional configurable Integration API base + token/mTLS advanced settings;
+- optional participant metadata lookup by slug, explicitly not treated as proof of current live presence;
+- conservative browser participant/speaker probe accepts only explicit IDs/names and explicit speaking data/ARIA semantics;
+- no speaker inference from CSS highlight/color, generic text, participant ordering or microphone-enabled state;
+- browser live-speaker state is not yet used to retroactively relabel delayed Whisper chunks;
+- 0.8 visual shell and 0.7.1 hardening are retained.
+
+Validation so far:
+
+```text
+36/36 tests passed
+compileall passed
+```
+
+Windows PR CI, packaged EXE self-test, merge and production Release are still pending. No size/SHA-256 is recorded until an actual GitHub Release exists.
+
+Rollback/current published fallback: `v0.8-visual-refresh`.
+
+Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.04`.
+
+---
+
+## v0.8-visual-refresh — current published release
 
 Status: **published** on 2026-08-28.
 
@@ -266,4 +305,4 @@ For every future release:
 6. Field-tested claims and CI-only claims must be distinguished explicitly.
 7. Published version tags/assets must not be overwritten; bump the version instead.
 
-Do not overwrite historical facts about an old release to match a newer implementation.
+Do not overwrite historical facts about an old release to match a newer implementation. Do not invent artifact metadata for an unreleased candidate.
