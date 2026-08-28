@@ -1,85 +1,102 @@
 # Current execution plan
 
 ## Objective
+Finish **DION Meeting Assistant 0.9 Guest Secretary Bot** safely: validate the room-URL-first guest flow on Windows CI, publish a new immutable EXE only after green gates, then field-test against the real corporate DION web client.
 
-Field-validate the now-published **DION Meeting Assistant 0.8 Visual Refresh** release on the target Windows workstation and in a real corporate DION meeting, then use evidence/screenshots/metrics to choose the next engineering iteration.
+## Published baseline
+Current published fallback:
 
-## Current state
+```text
+v0.8-visual-refresh
+DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe
+SHA-256: 0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9
+```
 
-Completed:
+0.9 is not yet a published Release.
 
-- 0.8 visual redesign implemented as native PySide6 widgets/QSS on top of 0.7.1 Hardening;
-- canonical `docs/design-docs/UI_VISUAL_SYSTEM.md` added;
-- PR #2 (`Implement 0.8 Visual Refresh`) merged into `dion-exe-build`;
-- visual PR Windows CI run `33129215245` passed source checks, Qt offscreen `MainWindow` smoke, pinned models, EXE build and packaged `--portable-selftest`;
-- initial production run `33129501062` passed application/model/build/self-test gates but failed only at the old release-existence probe;
-- PR #3 fixed that release guard without changing application code;
-- release-guard PR CI run `33145190036` passed;
-- final production Windows CI run `33145419554` passed all gates including Release publication and Actions artifact upload;
-- GitHub Release `v0.8-visual-refresh` was published successfully;
-- artifact: `DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`;
-- size: `627,541,530 bytes`;
-- SHA-256: `0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`;
-- release page: `https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`;
-- direct asset: `https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
+## 0.9 implemented state
+Completed in `dion-guest-bot-0.9`:
 
-## What is implemented in 0.8
+- ordinary HTTPS `/join/<slug>` room URL is the primary Secretary Bot input;
+- corporate/on-prem hosts are supported without hard-coded `dion.vc`;
+- slug parsing and inline UI feedback;
+- Guest Bot works without token/mTLS/API credentials;
+- Edge/Chrome isolated temporary guest profile;
+- bot-browser audio muted;
+- local DevTools bound to `127.0.0.1` with dynamic port;
+- best-effort automatic name fill and `Войти как гость` click;
+- visible manual guest fallback;
+- optional configurable DION IAPI base URL + existing token/mTLS advanced settings;
+- optional participant metadata by slug;
+- slug metadata explicitly marked as non-authoritative for current presence;
+- conservative browser probe for explicit participant IDs/names and explicit speaking data/ARIA;
+- no CSS-color/generic-text/microphone-enabled speaker inference;
+- browser speaker observation displayed as live state only, not retrospective Whisper relabel;
+- 0.8 visual shell and 0.7.1 hardening retained;
+- `websocket-client==1.8.0` added to locked dependency set;
+- release workflow updated to apply `dion-guest-bot/apply_090.py` and prepare a 0.9 binary/tag;
+- temporary reconstructed-source export workflow removed after development use.
 
-- modern light Windows-style native Qt shell;
-- left navigation with seven logical pages;
-- card-based live transcript instead of the old console-like text block;
-- active-speaker and overlap/interruption card states;
-- top status bar for meeting/recording/audio/DION state;
-- right summary rail for participants, speaker, audio quality, protocol draft and hotwords;
-- persistent bottom action bar for start/stop, DOCX export and protocol access;
-- dedicated Secretary Bot visual card and page;
-- existing DION/mTLS, Voice ID, diagnostics, protocol and recognition controls preserved and redistributed;
-- all 0.7.1 privacy/stability invariants retained.
+## Source validation already complete
+On reconstructed 0.8 + 0.9 patch:
 
-## Still requires field validation
+```text
+36/36 tests passed
+compileall passed
+```
 
-CI/self-test does **not** prove:
+New tests include corporate URL parsing, no-token guest mode, slug-IAPI semantics, manual browser fallback and primary/advanced UI hierarchy.
 
-- that the new UI renders exactly as intended on the user's target Windows resolution, DPI and scaling;
-- that every navigation/control path is comfortable during a long meeting;
-- real corporate DION mTLS authorization with production certificates;
-- Secretary Bot behavior in an actual corporate meeting;
-- long-duration WASAPI loopback + microphone stability on user endpoints;
-- real speaker-attribution accuracy with overlapping speech;
-- real Russian WER/CER improvement on reference audio.
+## Immediate next steps
+1. Ensure all canonical documentation/AI adapters match 0.9 implemented status.
+2. Open PR `dion-guest-bot-0.9` -> `dion-exe-build`.
+3. Run Windows PR CI.
+4. Confirm Qt offscreen `MainWindow` smoke includes the guest URL/advanced API controls.
+5. Confirm pinned model validation.
+6. Build PR EXE and pass packaged `--portable-selftest`.
+7. Do not publish from PR.
+8. Merge only after green PR CI.
+9. Run production CI from `dion-exe-build`.
+10. Publish immutable `v0.9-guest-secretary-bot` only after production self-test.
+11. Read the actual Release API and record artifact size/SHA-256 in `RELEASES.md` + a new released journal entry.
 
-These remain explicitly unverified until tested on the target Windows/DION environment.
+## Field validation after a 0.9 binary exists
+### Guest entry
+- Paste a real corporate `/join/<slug>` URL.
+- Confirm parsed host/slug.
+- Connect with token/mTLS left empty.
+- Confirm isolated Edge/Chrome guest session opens.
+- Confirm bot-browser audio is muted.
+- Test auto-name + guest click.
+- If auto-join does not work, verify manual guest entry remains usable.
 
-## Next evidence to collect
+### Browser adapter
+- Inspect whether the corporate DION version exposes `data-participant-id`/`data-user-id` or equivalent strong identifiers.
+- Inspect whether explicit speaking attributes/ARIA semantics exist.
+- Confirm lack of strong semantics is reported as capability unavailable, not as a false speaker guess.
+- Record timing offset between browser speaker state and actual captured audio/Whisper chunks.
 
-1. Download and launch the published 0.8 EXE on the target PC.
-2. Capture screenshots of the initial window, live transcript and settings at the actual Windows scaling/DPI.
-3. Verify all seven navigation pages and bottom actions.
-4. Connect with the corporate DION token and mTLS material.
-5. Test Secretary Bot join, participant roster, revoke and waiting-room behavior.
-6. Test system audio + microphone together on the target PC.
-7. Test 2/5/10 participant meetings with rapid speaker switching and overlap.
-8. Run a 60+ minute meeting and inspect queue depth, dropped chunks and latency.
-9. Measure false accepts/rejects for Voice ID and diarization errors.
-10. Where permitted, compare recognition against a manually corrected reference transcript using WER/CER.
+### Optional IAPI
+- Confirm real corporate IAPI base URL.
+- Test token + mTLS if available.
+- Test slug participant metadata.
+- Confirm UI does not label slug rows as currently active without stronger evidence.
 
-## Candidate next work
+### Audio/speaker
+- Test WASAPI + mic together.
+- Test 2/5/10 participants and overlap.
+- Run 60+ minutes and inspect queue/latency/drop metrics.
+- Calibrate Voice ID and diarization accuracy.
 
-After field evidence, prioritize one or more of:
-
-- UI responsive/high-DPI polish based on real 0.8 screenshots;
-- asynchronous speaker analysis;
-- PFX/P12 certificate support if required by corporate provisioning;
-- approved terminology profiles;
-- confidence/review markers;
-- optional final-pass transcript refinement;
-- migration from encoded `part* + apply_*.py` release tree to a normal source tree;
-- Authenticode/corporate packaging.
+## Blocking limitations
+- No documented/verified per-user DION PCM stream is used by 0.9.
+- Main STT audio remains Windows WASAPI Loopback.
+- Browser DOM semantics are deployment/version dependent and unverified on the target corporate DION until field testing.
+- Browser live-speaker state is not automatically applied to delayed transcript chunks until clock alignment is measured.
+- CI cannot prove real guest join, waiting room, enterprise browser policy or live speaker semantics.
 
 ## Repository administration
-
-GitHub currently reports repository `Zios86/test` as `public`. If this project is intended to remain private, repository visibility must be changed in GitHub settings; the available connector actions in this session do not expose a repository-visibility mutation.
+GitHub has reported `Zios86/test` as `public`. If the project is intended to be private, repository visibility must be changed in GitHub settings. Never commit real meeting links, participant data, tokens, certificates, private keys or transcripts.
 
 ## Update rule
-
-This file is the active plan, not a historical diary. Durable completed facts belong in `ROADMAP.md`, `RELEASES.md`, `CHANGELOG.md`, design docs and the append-only `VERSION_JOURNAL.md`.
+This file is the active plan, not the historical ledger. Durable completed facts go to `ROADMAP.md`, released artifact facts to `RELEASES.md`, user-visible changes to `CHANGELOG.md`, and every significant engineering step to append-only `VERSION_JOURNAL.md`.
