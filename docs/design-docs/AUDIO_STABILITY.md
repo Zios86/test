@@ -77,6 +77,8 @@ Native audio libraries can terminate the process through an access violation or 
 - emit technical errors without blocking UI;
 - flush final partial chunk on normal stop.
 
+1.0 additionally writes every captured frame to a continuous WAV file per source. Recording uses the source's native channel count, sample width and rate, closes in the worker `finally` block, and does not add another PortAudio stream. A long meeting can consume more than 1 GB across two uncompressed tracks; free disk space is therefore a field precondition.
+
 ## Pause behavior
 During pause, continue draining the device stream while discarding frames. Otherwise old device-buffer audio can appear after resume.
 
@@ -151,3 +153,4 @@ When full:
 7. Preflight before live meeting capture.
 8. Managed Guest Bot browser stays muted in the current WASAPI architecture.
 9. Guest browser is not represented as a direct Whisper audio source.
+10. Continuous recording reuses captured frames and must not alter the bounded STT queue behavior.
