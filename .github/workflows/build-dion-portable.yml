@@ -157,8 +157,11 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $tag = "v0.8-visual-refresh"
           $exe = ".\dist\DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe"
+          $PSNativeCommandUseErrorActionPreference = $false
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists; published releases are immutable. Bump the version instead." }
+          $releaseExists = ($LASTEXITCODE -eq 0)
+          $PSNativeCommandUseErrorActionPreference = $true
+          if ($releaseExists) { throw "Release $tag already exists; published releases are immutable. Bump the version instead." }
           $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
           $notes = Get-Content "RELEASE_NOTES_0.8.md" -Raw
           $notes += "`n`nSHA-256 EXE: $hash"
