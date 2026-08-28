@@ -70,6 +70,14 @@ Failure modes such as changed markup, security policy or missing DevTools return
 
 Automatic entry is **not** a release invariant. Manual guest entry is the required fallback.
 
+### Corporate browser gate (0.9.1)
+Field testing on the target corporate deployment showed a two-stage flow:
+
+1. DION first displays «Переход в Конференции» with «Продолжить в браузере».
+2. Only after that click does the guest-name form with «Войти как гость» appear.
+
+`attempt_guest_join()` therefore detects and clicks the visible web-continuation action, keeps retrying on the same controlled browser session, then fills the bot name and submits the guest form. English equivalents are supported conservatively. The native-app action is never selected.
+
 ## Browser room-state adapter
 `DionBrowserAdapter.probe_room_state()` is experimental/capability-gated.
 
