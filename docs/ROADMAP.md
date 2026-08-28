@@ -3,6 +3,8 @@
 ## Current line
 **0.9 Guest Secretary Bot — published**.
 
+**0.9.1 Browser Gate Hotfix — implemented/tested, release validation pending**. It handles the field-confirmed «Продолжить в браузере» gate before the guest-name form.
+
 Release: `v0.9-guest-secretary-bot`. Exact artifact metadata is in `RELEASES.md`.
 
 ## Completed foundation
