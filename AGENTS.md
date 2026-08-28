@@ -24,9 +24,9 @@ Short entry point for AI coding agents. Canonical project knowledge lives in `do
 Do not scan encoded `part*` files for orientation. Use `docs/PROJECT_MAP.md`.
 
 ## Current validation baseline
-Current published release: **v0.9-guest-secretary-bot**.
+Current published release: **v1.0-post-meeting-precision**. Next candidate: **v1.0.1-audit-hardening**.
 
-Artifact: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`  
+Artifact line: `DION_Meeting_Assistant_1.0_Post_Meeting_Precision_Portable.exe`
 Size: `627,722,376 bytes`  
 SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`
 
@@ -37,7 +37,7 @@ Validation:
 
 Corporate DION guest form/DOM semantics, real WASAPI behavior and browser-speaker timing remain field checks.
 
-The 0.9.1 browser-gate hotfix is implemented locally with `37/37` tests passing; Windows CI/release validation is pending.
+The 1.0.1 audit-hardening candidate has `46/46` local tests passing; Windows CI/release validation is pending.
 
 ## Non-negotiable rules
 - Windows 10/11 x64 target; STT local/offline by default.

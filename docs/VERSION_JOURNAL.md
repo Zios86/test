@@ -34,9 +34,24 @@
 
 ## Текущая версия
 
-**0.9 Guest Secretary Bot** — текущий опубликованный релиз (`v0.9-guest-secretary-bot`).
+**1.0 Post-meeting Precision** — текущий опубликованный релиз (`v1.0-post-meeting-precision`).
+
+Следующий кандидат: **1.0.1 Audit Hardening** (`v1.0.1-audit-hardening`).
 
 Основной опубликованный rollback: **0.8 Visual Refresh**.
+
+## 2026-08-28.08 — 1.0.1 Audit Hardening
+
+- Версия/ветка: `1.0.1` / `dion-audit-fixes-1.0.1`.
+- Тип: `fix`, `quality`, `security`, `build`, `docs`.
+- Статус: `implemented`, `tested`; Windows CI/release pending.
+- Закрыты пункты аудита 1–4, 6–7: безопасные ZIP/manifest, отказоустойчивая WAV-запись, объединение draft/Whisper, последовательная очередь сервера, сквозные тесты и полевые сценарии 15/60/120 минут.
+- Правки Ollama, меняющие числа или большую часть строки, не применяются автоматически.
+- Локально: `46 passed`, compileall приложения и сервера, воспроизведение всей цепочки патчей успешно.
+- Пункт 5 (TLS/VPN и автоматическая очистка аудио) исключён владельцем из этого выпуска.
+- Запланированы `DION_Meeting_Assistant_1.0.1_Audit_Hardening_Portable.exe` и `DION_Postprocess_Server_1.0.1.zip`; SHA фиксируются после публикации.
+
+---
 
 ## 2026-08-28.07 — Post-meeting Precision
 

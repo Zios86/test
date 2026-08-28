@@ -33,8 +33,8 @@
 AI-specific files `AGENTS.md`, `CLAUDE.md` and `.claude/skills/*` are adapters/procedures, not duplicate knowledge bases.
 
 ## Current documentation baseline
-- Current published release: **0.9 Guest Secretary Bot** (`v0.9-guest-secretary-bot`).
-- Artifact: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
+- Current published release: **1.0 Post-meeting Precision** (`v1.0-post-meeting-precision`).
+- Next candidate: **1.0.1 Audit Hardening**; 46 local tests passed, Windows CI pending.
 - Size: `627,722,376 bytes`.
 - SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`.
 - Source baseline: `36/36 tests + compileall passed`.

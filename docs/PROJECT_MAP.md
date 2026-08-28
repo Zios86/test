@@ -36,7 +36,7 @@ dion-postprocess/apply_100.py
 postprocess-server/             # private-LAN faster-whisper + Ollama service
 ```
 
-Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1 -> 1.0`.
+Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1 -> 1.0 -> 1.0.1`.
 
 ## Reconstructed application
 - `run.py` — startup, crash handlers, freeze support, portable self-test.
@@ -80,7 +80,7 @@ meeting audio
 Do not equate slug metadata with current room presence. Do not equate microphone-enabled state with speaking.
 
 ## Tests and release gates
-Current published release: **v0.9-guest-secretary-bot**.
+Current published release: **v1.0-post-meeting-precision**; next candidate: **v1.0.1-audit-hardening**.
 
 Validation:
 - reconstructed source: `36/36 tests passed` + compileall;

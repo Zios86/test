@@ -17,9 +17,9 @@ docs/              -> shared canonical project knowledge
 Do not treat chat history as the only place where an important decision exists.
 
 ## Current handoff status
-- Current published release: **0.9 Guest Secretary Bot**.
-- Tag: `v0.9-guest-secretary-bot`.
-- Artifact: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
+- Current published release: **1.0 Post-meeting Precision**.
+- Tag: `v1.0-post-meeting-precision`.
+- Next candidate: `v1.0.1-audit-hardening` (46 local tests; Windows CI pending).
 - Size: `627,722,376 bytes`.
 - SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`.
 - PR Windows CI `33150603611` passed through packaged self-test.
