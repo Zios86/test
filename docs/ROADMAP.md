@@ -5,6 +5,8 @@
 
 **0.9.1 Browser Gate Hotfix — implemented/tested, release validation pending**. It handles the field-confirmed «Продолжить в браузере» gate before the guest-name form.
 
+**1.0 Post-meeting Precision — implemented locally, release validation pending**. It records the original audio and adds an optional private-LAN faster-whisper + Ollama final pass without replacing the live transcript.
+
 Release: `v0.9-guest-secretary-bot`. Exact artifact metadata is in `RELEASES.md`.
 
 ## Completed foundation
@@ -14,6 +16,7 @@ Release: `v0.9-guest-secretary-bot`. Exact artifact metadata is in `RELEASES.md`
 - **0.7.1 Hardening:** mTLS configuration, safer Voice ID persistence/matching, opt-in diarization, speaker-handoff text splitting, pinned build inputs and non-clobber release policy.
 - **0.8 Visual Refresh:** modern native PySide6 shell, seven-page navigation, card transcript and canonical visual system.
 - **0.9 Guest Secretary Bot:** ordinary `/join/<slug>` room URL as primary entry; corporate/on-prem hosts; no mandatory event_id/token/mTLS for guest entry; isolated Edge/Chrome session; localhost-only best-effort guest automation; optional configurable IAPI; conservative browser participant/speaker probe.
+- **1.0 Post-meeting Precision:** continuous system/mic evidence tracks, authenticated streaming LAN jobs, large-model retranscription, conservative correction and immutable originals.
 
 ## 0.9 release validation
 - Reconstructed source: `36/36 tests passed` + compileall.
