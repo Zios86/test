@@ -38,6 +38,40 @@
 
 Основной опубликованный rollback: **0.8 Visual Refresh**.
 
+## 2026-08-28.07 — Post-meeting Precision
+
+- Версия/ветка: `1.0.0` / `dion-postprocess-1.0`.
+- Тип: `feature`, `quality`, `security`, `build`.
+- Статус: `implemented`, `tested`; Windows CI/release pending.
+- Цель: сохранить исходную запись и после встречи повысить точность стенограммы на отдельном LAN-компьютере.
+
+### Изменения
+- System audio и микрофон непрерывно записываются в разные WAV без дополнительного PortAudio-потока.
+- GUI отправляет WAV и исходный autosave только по явной команде пользователя; передача больших файлов потоковая.
+- Добавлен отдельный authenticated/allowlisted сервер для faster-whisper `large-v3-turbo` и консервативной коррекции Ollama `qwen3:4b`.
+- Исходники не изменяются; результат сохраняется отдельно, подозрительные сильные исправления помечаются для проверки.
+- При недоступности Ollama сохраняется точная Whisper-расшифровка; при недоступности сервера live STT продолжает работать.
+
+### Изменённые компоненты
+- `app/audio.py`, `app/postprocess.py`, `app/ui.py`;
+- `postprocess-server/`;
+- `dion-postprocess/apply_100.py`, workflow, тесты и проектная документация.
+
+### Проверка
+- `42 passed`; `compileall` исходного приложения и сервера прошёл.
+- Проверены private-IP policy, состав пакета, отсутствие аудио и защита от ZIP path traversal.
+
+### Ограничения/риски
+- AMD FX-6350 CPU будет обрабатывать long-form audio медленнее реального времени.
+- HTTP допустим только в доверенной изолированной LAN; для недоверенной сети нужен VPN/TLS proxy.
+- Требуются полевые тесты Windows WASAPI, продолжительной записи, реального качества и объёма диска.
+
+### Release/артефакт
+- `DION_Meeting_Assistant_1.0_Post_Meeting_Precision_Portable.exe` и `DION_Postprocess_Server_1.0.zip` запланированы; SHA фиксируются только после публикации.
+
+### Откат
+- Текущий опубликованный `v0.9.1-browser-gate-hotfix`.
+
 Стабильные резервные точки для отката: **0.8 Visual Refresh**, **0.7.1 Hardening**, **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
 
 ---

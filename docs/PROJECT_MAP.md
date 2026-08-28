@@ -32,9 +32,11 @@ dion-hardening/apply_071.py
 dion-visual/apply_080.py
 dion-guest-bot/apply_090.py
 dion-browser-gate/apply_091.py
+dion-postprocess/apply_100.py
+postprocess-server/             # private-LAN faster-whisper + Ollama service
 ```
 
-Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1`.
+Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1 -> 1.0`.
 
 ## Reconstructed application
 - `run.py` — startup, crash handlers, freeze support, portable self-test.
@@ -48,6 +50,7 @@ Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9 -> 0.9.1`.
 - `app/storage.py` — transcript/autosave/export/aliases.
 - `app/protocol.py` — deterministic decisions/tasks/questions.
 - `app/local_ai.py` — optional localhost-only protocol wording refinement.
+- `app/postprocess.py` — private-IP validation, meeting package, streaming submission, polling and safe result extraction.
 - `app/health.py`, `app/preflight.py`, `app/crash.py` — health/preflight/redacted diagnostics.
 
 ## 0.9 Guest Bot data sources
@@ -97,6 +100,7 @@ Field DION/WASAPI/browser semantics remain separate from CI.
 | Browser participant/speaker probe | `design-docs/DION_INTEGRATION.md`, `design-docs/PRIVACY_SECURITY.md` | `app/dion_bot.py`, `app/ui.py` |
 | UI / visual design | `design-docs/UI_VISUAL_SYSTEM.md` | `app/ui.py`, `dion-visual/apply_080.py`, `dion-guest-bot/apply_090.py` |
 | Speech quality | `design-docs/SPEECH_RECOGNITION.md` | `app/transcriber.py`, `app/ui.py` |
+| Post-meeting precision | `ARCHITECTURE.md`, `design-docs/PRIVACY_SECURITY.md` | `app/postprocess.py`, `postprocess-server/postprocess_server.py` |
 | Speaker/overlap | `design-docs/SPEAKER_IDENTIFICATION.md` | `app/speakers.py`, `app/speaker_profiles.py`, `app/transcriber.py` |
 | WASAPI/start crash | `design-docs/AUDIO_STABILITY.md` | `app/audio.py`, `app/ui.py`, `app/crash.py` |
 | Privacy/secrets | `design-docs/PRIVACY_SECURITY.md` | DION/browser/speaker/storage/diagnostics modules |

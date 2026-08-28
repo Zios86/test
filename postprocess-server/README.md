@@ -1,0 +1,23 @@
+# DION Postprocess Server
+
+Сервер выполняет послевстречную обработку: повторно распознаёт сохранённые WAV через faster-whisper и корректирует формулировки через локальную Ollama. Исходные файлы клиента не перезаписываются.
+
+## Установка на 192.168.1.128
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+ollama pull qwen3:4b
+```
+
+Запуск (укажите IP компьютера с DION Meeting Assistant и длинный случайный токен):
+
+```powershell
+.\start_server.ps1 -ClientIP 192.168.1.50 -Token "ЗАМЕНИТЕ_НА_ДЛИННЫЙ_СЛУЧАЙНЫЙ_ТОКЕН"
+```
+
+В брандмауэре разрешите TCP 8765 только с указанного клиентского IP. Не публикуйте порт в интернете.
+
+На AMD FX-6350 обработка `large-v3-turbo` выполняется после встречи и может занимать заметно больше длительности записи. Первый запуск скачивает модель.

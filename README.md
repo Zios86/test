@@ -68,6 +68,8 @@ https://корпоративный-dion/join/room-slug
 - `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/release hardening 0.7.1;
 - `dion-visual/apply_080.py` — native PySide6 Visual Refresh 0.8;
 - `dion-guest-bot/apply_090.py` — room-URL-first Guest Secretary Bot 0.9.
+- `dion-browser-gate/apply_091.py` — двухэтапный корпоративный browser gate 0.9.1;
+- `dion-postprocess/apply_100.py` — запись и точная пакетная обработка 1.0.
 
 Не изучайте encoded `part*` по одному. Логическая карта проекта — в `docs/PROJECT_MAP.md`.
 

@@ -19,6 +19,7 @@ Short entry point for AI coding agents. Canonical project knowledge lives in `do
 - `dion-visual/apply_080.py`;
 - `dion-guest-bot/apply_090.py`.
 - `dion-browser-gate/apply_091.py`.
+- `dion-postprocess/apply_100.py`.
 
 Do not scan encoded `part*` files for orientation. Use `docs/PROJECT_MAP.md`.
 
@@ -60,6 +61,7 @@ The 0.9.1 browser-gate hotfix is implemented locally with `37/37` tests passing;
 - Recognition: `docs/design-docs/SPEECH_RECOGNITION.md`, `app/transcriber.py`.
 - Speaker ID/overlap: `docs/design-docs/SPEAKER_IDENTIFICATION.md`, `app/speakers.py`, `app/speaker_profiles.py`.
 - Audio: `docs/design-docs/AUDIO_STABILITY.md`, `app/audio.py`.
+- Post-meeting precision: `docs/ARCHITECTURE.md`, `docs/design-docs/PRIVACY_SECURITY.md`, `app/postprocess.py`, `postprocess-server/`.
 - Privacy: `docs/design-docs/PRIVACY_SECURITY.md`.
 - Release/build: `docs/DEVELOPMENT.md`, workflow, patch scripts, model manifest.
 - History: `docs/VERSION_JOURNAL.md`.

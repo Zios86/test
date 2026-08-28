@@ -79,8 +79,10 @@ Guest entry itself does not require these credentials.
 
 The slug endpoint result is not treated as proof of current room presence. Do not use an uncertain slug roster row to automatically assign a real speaker name.
 
-## Temporary audio
-Recognition uses temporary WAV chunks which are removed after normal processing. Autosave/diagnostics do not archive raw audio. Any future final-pass mode requiring audio retention must be explicit opt-in with retention/deletion rules.
+## Meeting audio and 1.0 final pass
+Recognition chunks remain temporary, but 1.0 also creates explicit session evidence files `system_audio.wav` and `microphone_audio.wav`. They remain local unless the user presses the post-processing button. The original WAV files and `transcript_autosave.json` are never rewritten by AI.
+
+Post-processing accepts only an explicit private/loopback IP over HTTP, uses a bearer token, and the network server requires an allowed client IP. This protects the intended trusted LAN workflow but does not provide TLS against a hostile local network; use a trusted isolated LAN or a VPN tunnel when transport confidentiality is required. Tokens must not be committed or logged. Server job directories contain sensitive meeting data and require an operator-defined deletion/retention policy.
 
 ## Voice identity
 Persistent Voice ID is opt-in. Persisted profiles exclude participant name/e-mail and contain technical `user_id` + embedding/sample metadata. On Windows persistent payload is protected by current-user DPAPI.
@@ -120,3 +122,4 @@ Optional Ollama protocol refinement remains loopback-only (`localhost`, `127.0.0
 8. Biometric persistence is opt-in and DPAPI-protected on Windows.
 9. Uncertain speaker identity is never guessed as a real name.
 10. `microphone enabled` is never equated with `speaking`.
+11. Post-processing is explicit, private-LAN-only, authenticated and never mutates source evidence.
