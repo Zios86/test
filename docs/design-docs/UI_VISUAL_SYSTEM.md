@@ -1,18 +1,20 @@
-# UI visual system — 0.8 Visual Refresh
+# UI visual system — 0.8 Visual Refresh + 0.9 Guest Flow
 
 ## Purpose
+This document is the canonical visual/UI specification for DION Meeting Assistant.
 
-This document is the canonical visual/UI specification for DION Meeting Assistant. Version 0.8 translates the approved concept into native PySide6 widgets and QSS; the generated concept images are references only and are not embedded as application screenshots or raster UI.
+0.8 established the native PySide6/QSS visual language. 0.9 keeps that visual system and changes the **interaction hierarchy** for DION: ordinary guest room URL is primary; Integration API/mTLS is advanced/optional.
+
+Generated concept images are references only. Shipping UI remains native Qt widgets/QSS.
 
 ## Product principles
-
-1. **Читаемость** — meeting text is the primary content; controls must not compete with the transcript.
+1. **Читаемость** — meeting text is the primary content; controls must not compete with transcript reading.
 2. **Спокойная обратная связь** — connection/audio/recording state is visible without modal noise.
-3. **Быстрые действия** — start/stop/export/protocol actions stay one click away.
-4. **Конфиденциальность** — visuals must never encourage exposing token/certificate/transcript data in screenshots or diagnostics.
+3. **Быстрые действия** — start/stop/export/protocol stay one click away.
+4. **Простая настройка** — common workflows should ask for business/user concepts, not API internals.
+5. **Конфиденциальность** — UI must not encourage exposing token/certificate/meeting URL/transcript data in screenshots or diagnostics.
 
 ## Color tokens
-
 - Primary blue: `#2563EB`
 - Success green: `#22C55E`
 - Danger red: `#EF4444`
@@ -24,21 +26,19 @@ This document is the canonical visual/UI specification for DION Meeting Assistan
 - Gray 100: `#F1F5F9`
 - Gray 50: `#F8FAFC`
 
-Use blue for selected navigation, primary actions and active speaker emphasis; green for healthy/connected state; red for recording/stop and overlap warnings. Do not use color as the only signal: important states also have text.
+Use blue for selected navigation/primary actions/active speaker emphasis; green for healthy/connected state; red for recording/stop/overlap warnings. Important state also has text.
 
 ## Typography
-
-Use the platform-native Segoe UI family where available.
+Use platform-native Segoe UI where available.
 
 - Page title: 22–24 px, semibold.
 - Section title: 16–18 px, semibold.
-- Main transcript: 14–16 px, regular.
-- Secondary metadata/role/timestamp: 11–13 px.
+- Main transcript: 14–16 px.
+- Secondary metadata/timestamp: 11–13 px.
 - Button labels: 13–14 px, medium/semibold.
 
 ## Application shell
-
-The 0.8 shell is intentionally stable:
+The 0.8 shell remains stable:
 
 ```text
 Top status bar
@@ -50,9 +50,7 @@ Bottom action bar
 ```
 
 ### Left navigation
-
 Canonical entries:
-
 1. Встреча
 2. Стенограмма
 3. Протокол
@@ -61,87 +59,117 @@ Canonical entries:
 6. Диагностика
 7. Настройки
 
-Selected item uses primary blue text/accent and a soft blue background. The Secretary Bot card below navigation shows connection state but is not a replacement for the dedicated bot page.
+The Secretary Bot status card below navigation is a summary, not the configuration form.
 
 ### Top status bar
-
-Show only high-value live state:
-
+Show high-value live state only:
 - meeting title;
-- recording state and elapsed time;
+- recording state/time;
 - microphone state;
 - system-audio state;
-- DION connection state.
+- DION/Guest Bot status.
 
 ### Bottom action bar
-
-Primary actions remain visible:
-
 - `Начать стенографию` — blue primary;
 - `Остановить` — red danger;
 - `Экспорт DOCX` — secondary;
 - `Открыть протокол` — secondary/ghost.
 
 ## Transcript cards
-
 `TranscriptCardView` is the canonical live transcript presentation.
 
-Each card includes:
-
-- timestamp;
-- initials/avatar-style circle;
-- display speaker name;
-- optional role/state;
-- recognized text;
-- state styling.
+Each card includes timestamp, initials/avatar, display speaker name, optional state/role and recognized text.
 
 States:
+- Normal — neutral;
+- `Говорит` — primary-blue outline/state;
+- `Перебивание` — danger accent.
 
-- Normal: neutral border/background.
-- Current/active speaker: primary-blue outline plus `Говорит` label.
-- Overlap/interruption: danger/red accent plus `Перебивание` label.
-
-Do not rely solely on color for `Говорит` or `Перебивание`.
+Do not rely solely on color.
 
 ## Right summary rail
-
 Canonical cards:
-
 - Участники;
 - Активный спикер;
 - Качество аудио;
 - Черновик протокола;
 - Горячие слова.
 
-These cards summarize existing state. They must not invent participant identity, protocol readiness or audio-quality facts that the underlying application has not computed.
+These summarize actual state only. Browser/IAPI uncertainty must remain visible rather than presenting uncertain identity as fact.
 
-## Settings and DION controls
+## 0.9 Secretary Bot page hierarchy
+The dedicated `Секретарь-бот` page must present the common path first.
 
-DION token, mTLS certificate, private key and optional key password remain settings controls with the same security behavior as 0.7.1. The visual redesign must not persist secrets merely for convenience.
+### Primary group: `Гостевой вход в конференцию`
+Fields/actions:
+- `Ссылка на встречу` — HTTPS `/join/<slug>` URL;
+- `Имя бота` — default `Секретарь-бот`;
+- `Автоматически заполнить имя и нажать «Войти как гость»` — checked by default;
+- parsed `Slug` / host feedback;
+- connect/disconnect/status actions.
+
+User should not need to understand `event_id` for ordinary guest entry.
+
+Invalid URL feedback should be inline and readable, e.g. URL not recognized or missing `/join/<slug>`.
+
+### Advanced group: DION Integration API / mTLS
+Token, API base, certificate, private key and optional password belong under a clearly labeled **advanced/optional** group.
+
+UI copy must state:
+- guest entry works without these fields;
+- slug participant metadata does not prove who is currently in the room;
+- mTLS/token are deployment/admin integration settings.
+
+Do not show an `event_id` field in the primary 0.9 flow.
+
+## Guest Bot status language
+Recommended states:
+- `Готов к гостевому входу`;
+- `Открываю гостевой вход…`;
+- `Имя отправлено / вход подтверждается`;
+- `Требуется ручное подтверждение в браузере`;
+- `В комнате` only when live evidence is strong enough;
+- `Browser speaker signal unavailable` should be presented as capability absence, not as an error in transcription.
+
+Never display `В комнате` only because slug IAPI returned a participant record.
+
+## Browser live speaker display
+When explicit browser speaking semantics are available, show them as a **live indicator**, clearly distinct from already-finalized transcript attribution.
+
+0.9 must not silently rewrite old transcript cards based on current browser speaker state because timing alignment is not calibrated.
+
+If browser speaker evidence is missing, the UI falls back to acoustic/unknown state without inventing a name.
+
+## Settings and security controls
+The visual layer must preserve these behaviors:
+- DION token/mTLS values are not persisted for convenience;
+- real meeting URL is not copied into diagnostics;
+- guest browser automation remains optional/fallback-friendly;
+- diarization remains opt-in;
+- persistent Voice ID remains separately opt-in.
 
 ## Spacing and shape
-
-Use an 8 px spacing rhythm where practical. Typical radii: 8–14 px. Cards use subtle borders and restrained shadows; avoid heavy gradients, glossy effects and decorative animation that distracts from transcript reading.
+Use an 8 px rhythm where practical. Typical radii 8–14 px. Cards use subtle borders/restraint; avoid heavy gradients or distracting animation.
 
 ## Accessibility / long-session use
-
-- Keep strong text contrast on light backgrounds.
-- Keep buttons at comfortable pointer targets.
-- Avoid rapid blinking/pulsing indicators.
-- Keep recording and failure states readable without color perception.
-- Preserve keyboard focus behavior of native Qt controls.
+- strong contrast;
+- comfortable pointer targets;
+- no rapid blinking;
+- recording/failure states readable without color perception;
+- preserve native keyboard focus;
+- advanced integration fields should not dominate the common guest flow.
 
 ## Implementation boundary
+Primary implementation: `app/ui.py` (`MODERN_QSS`, `TranscriptCardView`, `MainWindow`).
 
-Primary implementation: `app/ui.py` (`MODERN_QSS`, `TranscriptCardView`, `MainWindow` shell/navigation/summary methods).
+0.9 adds guest-flow controls including `dion_room_url_edit`, `secretary_auto_join`, parsed slug feedback and advanced `dion_api_base_edit`, while preserving the 0.8 shell.
 
-0.8 is a visual/interaction restructuring only. Audio capture, DION mTLS, offline STT, privacy rules, protocol extraction and speaker-identification invariants remain governed by their existing design docs.
+Browser/URL semantics are governed by `DION_INTEGRATION.md`; privacy rules by `PRIVACY_SECURITY.md`.
 
 ## Validation
-
-Before release:
-
-- source test suite must pass;
-- Windows CI must instantiate `MainWindow` with `QT_QPA_PLATFORM=offscreen`;
-- packaged EXE self-test must pass;
-- actual user-visible rendering on the target Windows display remains a field check after publication.
+Before 0.9 release:
+- source test suite passes;
+- Windows CI instantiates `MainWindow` with `QT_QPA_PLATFORM=offscreen`;
+- smoke asserts room-URL primary flow and advanced API controls exist;
+- packaged EXE self-test passes;
+- actual guest-form/browser rendering on target corporate DION remains a field check after publication.
