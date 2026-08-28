@@ -9,6 +9,7 @@ on:
       - 'dion-quality/**'
       - 'dion-secretary-bot/**'
       - 'dion-hardening/**'
+      - 'dion-visual/**'
       - 'release/model-manifest.json'
       - '.github/workflows/build-dion-portable.yml'
   push:
@@ -19,6 +20,7 @@ on:
       - 'dion-quality/**'
       - 'dion-secretary-bot/**'
       - 'dion-hardening/**'
+      - 'dion-visual/**'
       - 'release/model-manifest.json'
       - '.github/workflows/build-dion-portable.yml'
   workflow_dispatch:
@@ -62,7 +64,7 @@ jobs:
         with:
           python-version: '3.11.9'
 
-      - name: Apply 0.5.1 through 0.7.1 patches
+      - name: Apply 0.5.1 through 0.8 patches
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -71,9 +73,10 @@ jobs:
           python dion-quality/apply_060.py
           python dion-secretary-bot/apply_070.py src
           python dion-hardening/apply_071.py src
+          python dion-visual/apply_080.py src
           python -m compileall -q src/app src/run.py
 
-      - name: Install locked dependencies and validate 0.7.1 source
+      - name: Install locked dependencies and validate 0.8 source
         working-directory: src
         shell: pwsh
         run: |
@@ -83,8 +86,10 @@ jobs:
           pip install --no-deps -r requirements-ci.lock.txt
           pip check
           python -m pytest -q
-          python -c "from pathlib import Path; u=Path('app/ui.py').read_text(encoding='utf-8'); d=Path('app/dion_api.py').read_text(encoding='utf-8'); b=Path('app/dion_bot.py').read_text(encoding='utf-8'); p=Path('app/speaker_profiles.py').read_text(encoding='utf-8'); t=Path('app/transcriber.py').read_text(encoding='utf-8'); assert 'enable_diarization.setChecked(False)' in u; assert 'client_key_password' in d; assert 'cleanup_stale_guest_profiles' in b; assert 'DIONVP2' in p; assert 'word_timestamps=bool(self.speaker_process' in t; print('0.7.1 hardening source checks passed')"
-          python -c "from app.health import APP_VERSION; import app; assert APP_VERSION == '0.7.1'; assert app.__version__ == '0.7.1'; print('Version checks passed')"
+          python -c "from pathlib import Path; u=Path('app/ui.py').read_text(encoding='utf-8'); d=Path('app/dion_api.py').read_text(encoding='utf-8'); b=Path('app/dion_bot.py').read_text(encoding='utf-8'); p=Path('app/speaker_profiles.py').read_text(encoding='utf-8'); t=Path('app/transcriber.py').read_text(encoding='utf-8'); assert 'enable_diarization.setChecked(False)' in u; assert 'client_key_password' in d; assert 'cleanup_stale_guest_profiles' in b; assert 'DIONVP2' in p; assert 'word_timestamps=bool(self.speaker_process' in t; assert 'class TranscriptCardView' in u; assert 'MODERN_QSS' in u; assert '#2563EB' in u; assert 'Секретарь-бот' in u; print('0.8 visual + 0.7.1 hardening source checks passed')"
+          python -c "from app.health import APP_VERSION; import app; assert APP_VERSION == '0.8.0'; assert app.__version__ == '0.8.0'; print('Version checks passed')"
+          $env:QT_QPA_PLATFORM = "offscreen"
+          python -c "from PySide6.QtWidgets import QApplication; from app.ui import MainWindow, TranscriptCardView; MainWindow.refresh_devices=lambda self: None; qapp=QApplication([]); w=MainWindow(); assert w.tabs.count()==7; assert isinstance(w.transcript_view, TranscriptCardView); assert w.windowTitle().startswith('DION Meeting Assistant'); w.close(); qapp.processEvents(); print('0.8 Qt offscreen MainWindow smoke passed')"
           python -c "from app.audio import _acquire_pa,_release_pa; p1=_acquire_pa(); p2=_acquire_pa(); assert p1 is p2; _release_pa(); _release_pa(); print('Shared PortAudio context check passed')"
           python -c "import sherpa_onnx; assert getattr(sherpa_onnx,'OfflineSpeakerDiarization',None) is not None; print('sherpa-onnx diarization API available')"
 
@@ -116,11 +121,11 @@ jobs:
           if ($seg.Length -lt 100KB) { throw "Speaker segmentation model is unexpectedly small: $($seg.Length)" }
           python -c "from app.speakers import OfflineSpeakerDiarizer; d=OfflineSpeakerDiarizer('bundled_models/pyannote_segmentation_3_0.onnx','bundled_models/wespeaker_en_voxceleb_resnet34.onnx'); print('Speaker models validated, sample rate:', d.diarizer.sample_rate)"
 
-      - name: Build 0.7.1 portable EXE
+      - name: Build 0.8 portable EXE
         working-directory: src
         shell: cmd
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.7.1_Hardening_Portable" ^
+          pyinstaller --noconfirm --clean --onefile --windowed --name "DION_Meeting_Assistant_0.8_Visual_Refresh_Portable" ^
             --collect-all faster_whisper ^
             --collect-all ctranslate2 ^
             --collect-all av ^
@@ -135,7 +140,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $true
-          $exe = ".\dist\DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe"
+          $exe = ".\dist\DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe"
           $p = Start-Process -FilePath $exe -ArgumentList "--portable-selftest" -PassThru -Wait
           if ($p.ExitCode -ne 0) { throw "Portable self-test failed: $($p.ExitCode)" }
           Get-FileHash $exe -Algorithm SHA256
@@ -148,18 +153,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v0.7.1"
-          $exe = ".\dist\DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe"
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          $tag = "v0.8-visual-refresh"
+          $exe = ".\dist\DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe"
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists; published releases are immutable. Bump the version instead." }
           $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
-          $notes = Get-Content "RELEASE_NOTES_0.7.1.md" -Raw
+          $notes = Get-Content "RELEASE_NOTES_0.8.md" -Raw
           $notes += "`n`nSHA-256 EXE: $hash"
-          gh release create $tag $exe --target $env:GITHUB_SHA --title "DION Meeting Assistant 0.7.1 Hardening" --notes $notes --repo $env:GITHUB_REPOSITORY
+          gh release create $tag $exe --target $env:GITHUB_SHA --title "DION Meeting Assistant 0.8 Visual Refresh" --notes $notes --repo $env:GITHUB_REPOSITORY
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: DION_Meeting_Assistant_0.7.1_Hardening_${{ github.run_id }}
-          path: src/dist/DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe
+          name: DION_Meeting_Assistant_0.8_Visual_Refresh_${{ github.run_id }}
+          path: src/dist/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe
           compression-level: 6
           if-no-files-found: error
