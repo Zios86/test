@@ -15,27 +15,30 @@ Short entry point for AI coding agents. Canonical project knowledge lives in `do
 - `dion-hotfix/apply_051.py` — shared-PortAudio stability;
 - `dion-quality/apply_060.py` — recognition quality;
 - `dion-secretary-bot/apply_070.py` — DION roster/Secretary Bot + isolated speaker fallback;
-- `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/speaker-attribution/release hardening.
+- `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/speaker-attribution/release hardening;
+- `dion-visual/apply_080.py` — native PySide6/QSS Visual Refresh.
 
 Do not scan encoded `part*` files for orientation. Use the project map.
 
 ## Current validation baseline
-Published release: **v0.7.1 Hardening**.
+Published release: **v0.8-visual-refresh**.
 
-Reconstructed 0.7.1 source baseline: `46` automated tests passing locally. The published release additionally passed Windows PR CI, production CI, pinned-model validation, one-file EXE build and packaged `--portable-selftest`. Corporate DION/WASAPI field validation is still separate and unproven.
+0.8 visual-refresh development workspace passed `48/48` tests and compileall. Published 0.8 additionally passed Windows PR validation, Qt `offscreen` `MainWindow` smoke, pinned-model validation, one-file EXE build and packaged `--portable-selftest`; final production run `33145419554` published the Release. Corporate DION/WASAPI and actual target-display usability remain field checks.
 
 ## Non-negotiable rules
 - Windows 10/11 x64 target.
 - STT local/offline by default.
 - Preserve shared PortAudio context safety.
+- Preserve the 0.8 visual system unless an explicit redesign is requested; read `docs/design-docs/UI_VISUAL_SYSTEM.md` before UI changes.
 - Diarization is opt-in until field performance is proven.
 - DION IAPI uses token + mTLS when required; credentials stay memory-only.
 - Never infer a participant name from roster alone.
 - Persistent voice profiles are opt-in; on Windows they are DPAPI-protected and must not persist name/e-mail.
 - Diagnostics/crash reports exclude transcript/audio/tokens/invite secrets.
-- Published releases are immutable: never replace an existing release asset/tag.
+- Published version assets are not clobbered; bump the version instead.
 
 ## Fast routing
+- UI/visual design: `docs/design-docs/UI_VISUAL_SYSTEM.md`, `app/ui.py`.
 - Speech recognition: `docs/design-docs/SPEECH_RECOGNITION.md`, `app/transcriber.py`.
 - Speaker ID/overlap: `docs/design-docs/SPEAKER_IDENTIFICATION.md`, `app/speakers.py`, `app/speaker_profiles.py`.
 - DION/mTLS/Secretary Bot: `docs/design-docs/DION_INTEGRATION.md`, `app/dion_api.py`, `app/dion_bot.py`, `app/ui.py`.
@@ -45,4 +48,4 @@ Reconstructed 0.7.1 source baseline: `46` automated tests passing locally. The p
 - Version history: `docs/VERSION_JOURNAL.md`.
 
 ## Before finishing
-Run applicable tests, update `VERSION_JOURNAL.md` for significant work, and update every affected canonical document according to `docs/DOCUMENTATION_POLICY.md`. Do not claim corporate DION/WASAPI field validation unless it actually happened.
+Run applicable tests, update `VERSION_JOURNAL.md` for significant work, and update every affected canonical document according to `docs/DOCUMENTATION_POLICY.md`. Do not claim corporate DION/WASAPI or target-display field validation unless it actually happened.
