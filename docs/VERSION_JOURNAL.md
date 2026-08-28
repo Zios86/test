@@ -34,11 +34,106 @@
 
 ## Текущая версия
 
-**0.8 Visual Refresh** — текущий опубликованный релиз.
+**0.9 Guest Secretary Bot** — текущая development candidate на ветке `dion-guest-bot-0.9`; implemented/tested локально, **не опубликована**.
 
-Предыдущий релиз и основной rollback: **0.7.1 Hardening**.
+Текущий опубликованный релиз и основной rollback: **0.8 Visual Refresh**.
 
-Стабильные резервные точки для отката: **0.7.1 Hardening**, **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+Стабильные резервные точки для отката: **0.8 Visual Refresh**, **0.7.1 Hardening**, **0.7 Secretary Bot**, **0.6 Quality**, **0.5.1 Safe** в зависимости от характера регрессии.
+
+---
+
+## 2026-08-28.04 — 0.9 Guest Secretary Bot: room-URL-first guest flow
+
+- Версия/ветка: `0.9.0`, `dion-guest-bot-0.9`
+- Тип: `feature`, `fix`, `security`, `build`, `docs`
+- Статус: `implemented`, `tested`, `unreleased`
+- Цель: сделать обычную гостевую ссылку DION основным способом подключения Секретаря-бота, убрать обязательность `event_id`/token/mTLS для обычного пользователя и подготовить безопасный browser-based metadata/speaker adapter без ложных утверждений о live presence/active speaker.
+
+### Изменения
+
+- основной пользовательский вход теперь принимает HTTPS URL вида `/join/<slug>`;
+- `parse_dion_join_url()` извлекает host/slug и не жёстко привязан к `dion.vc`, поэтому поддерживает corporate/on-prem DION;
+- URL с embedded username/password отвергаются;
+- `SecretaryBotController.prepare_guest()` готовит гостевой режим без DION IAPI client;
+- `event_id` убран из обычного 0.9 UI flow;
+- имя `Секретарь-бот` и auto-join checkbox находятся в primary guest section;
+- Edge/Chrome запускается в отдельном временном профиле, в private/incognito режиме по возможности, с `--mute-audio`;
+- DevTools endpoint привязан к `127.0.0.1`, порт выбирается динамически;
+- `DionBrowserAdapter.attempt_guest_join()` best-effort заполняет имя и нажимает `Войти как гость`/`Join as guest`;
+- если DevTools/DOM/enterprise policy не позволяют автоматизацию, остаётся visible manual guest fallback;
+- добавлен `DionBrowserAdapter.probe_room_state()` с capability-gated чтением только явных participant/speaking data/ARIA semantics;
+- запрещено выводить speaker identity из CSS color/highlight, generic text, participant order или microphone-enabled state;
+- browser active-speaker state пока используется только как live indicator и не переподписывает delayed Whisper chunks до field timing calibration;
+- DION Integration API перенесён в optional advanced settings;
+- API base URL стал настраиваемым для corporate deployment;
+- добавлен `DionIntegrationClient.list_event_users_by_slug()` для `GET /events/slug/<slug>`;
+- slug-IAPI metadata намеренно возвращается без доказанного `is_active=true`: implemented response не рассматривается как live presence source;
+- legacy event-id invite/users API остаётся для backward compatibility;
+- main STT media source остаётся Windows WASAPI Loopback; per-user DION PCM не заявляется;
+- добавлен locked dependency `websocket-client==1.8.0` для localhost DevTools WebSocket;
+- release chain расширена `dion-guest-bot/apply_090.py` после `apply_080.py`;
+- workflow подготовлен к будущим `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe` и `v0.9-guest-secretary-bot`;
+- временный development workflow для экспорта reconstructed 0.8 source был создан для точной разработки 0.9 и удалён до merge candidate.
+
+### Изменённые компоненты
+
+- `dion-guest-bot/apply_090.py` и multipart payload;
+- логические `app/dion_bot.py`, `app/dion_api.py`, `app/ui.py`, `app/health.py`, `app/__init__.py`;
+- `requirements.txt`, `requirements-ci.lock.txt`;
+- `tests/test_guest_bot_09.py` и связанные DION/UI tests;
+- `.github/workflows/build-dion-portable.yml`;
+- canonical docs: README/AGENTS/CLAUDE, PROJECT_MAP, ARCHITECTURE, DEVELOPMENT, DION_INTEGRATION, PRIVACY_SECURITY, UI_VISUAL_SYSTEM, ROADMAP, CURRENT, RELEASES, CHANGELOG, AI handoff/skills.
+
+### Проверка
+
+Reconstructed 0.8 source + `apply_090.py`:
+
+```text
+36/36 tests passed
+compileall passed
+```
+
+Новые tests подтверждают:
+- parsing `https://corporate-host/join/<slug>`;
+- reject non-join URL;
+- Guest Bot без API token;
+- slug API path без `event_id`;
+- slug roster не заявляет `is_active=true`;
+- manual browser fallback;
+- successful guest-click state не считается доказательством `room_observed=true`;
+- primary 0.9 UI содержит room URL/auto-join и advanced API base, без primary `dion_event_id_edit`.
+
+Windows PR CI, Qt smoke, packaged EXE self-test, merge и production Release на момент этой записи **ещё не зафиксированы как завершённые**.
+
+### Ограничения/риски
+
+- automatic guest form automation зависит от фактического DOM и enterprise browser policy;
+- browser participant/speaking semantics в corporate DION ещё не field-validated;
+- отсутствие сильных DOM semantics должно приводить к `capability unavailable`, а не к угадыванию;
+- browser live-speaker timing относительно WASAPI/Whisper не откалиброван;
+- browser speaker state не применяется ретроспективно к transcript chunks;
+- slug IAPI metadata не является current-presence proof;
+- main STT audio всё ещё WASAPI mixed output;
+- CI не может доказать фактический guest join/waiting-room/live speaker behavior.
+
+### Release/артефакт
+
+На момент записи **нет опубликованного 0.9 Release** и поэтому нет достоверных size/SHA-256.
+
+Planned identity:
+
+```text
+v0.9-guest-secretary-bot
+DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
+```
+
+Фактические metadata должны быть добавлены отдельной released-записью после успешного production publication.
+
+### Откат
+
+Опубликованный rollback: `v0.8-visual-refresh`.
+
+При DION-интеграционной регрессии также доступны `v0.7.1` / `v0.7-secretary-bot`.
 
 ---
 
