@@ -33,24 +33,23 @@ dion-visual/apply_080.py
 dion-guest-bot/apply_090.py
 ```
 
-Patch order is `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9`.
+Patch order: `0.5.1 -> 0.6 -> 0.7 -> 0.7.1 -> 0.8 -> 0.9`.
 
 ## Reconstructed application
 - `run.py` — startup, crash handlers, freeze support, portable self-test.
-- `app/ui.py` — native 0.8 shell plus 0.9 guest-flow orchestration: room URL, bot name, auto-join toggle, optional advanced IAPI/mTLS, browser-room polling, participants display, meeting lifecycle.
+- `app/ui.py` — native 0.8 shell plus 0.9 guest-flow orchestration: room URL, bot name, auto-join, optional advanced IAPI/mTLS, browser-room polling, participants display and meeting lifecycle.
 - `app/audio.py` — device discovery, shared PortAudio context, WASAPI/microphone capture.
 - `app/transcriber.py` — faster-whisper, context/hotwords/VAD, word-level speaker handoff split.
 - `app/speakers.py` — isolated sherpa-onnx diarization/overlap/embeddings.
 - `app/speaker_profiles.py` — opt-in cross-meeting Voice ID, Windows DPAPI, conservative matching.
-- `app/dion_api.py` — optional DION IAPI HTTPS/token/mTLS client; legacy event-id users/invites plus 0.9 `list_event_users_by_slug()` metadata path.
-- `app/dion_bot.py` — 0.9 Guest Bot core: `DionRoomLink`, `parse_dion_join_url()`, `SecretaryBotController.prepare_guest()`, `DionBrowserAdapter`, `GuestBrowserSession`, `launch_guest_room()`, guest-profile cleanup; legacy API-invite launcher retained for compatibility.
+- `app/dion_api.py` — optional DION IAPI HTTPS/token/mTLS client; legacy event-id paths plus `list_event_users_by_slug()` metadata path.
+- `app/dion_bot.py` — `DionRoomLink`, `parse_dion_join_url()`, `SecretaryBotController.prepare_guest()`, `DionBrowserAdapter`, `GuestBrowserSession`, `launch_guest_room()`, guest-profile cleanup and legacy API-invite compatibility.
 - `app/storage.py` — transcript/autosave/export/aliases.
 - `app/protocol.py` — deterministic decisions/tasks/questions.
 - `app/local_ai.py` — optional localhost-only protocol wording refinement.
-- `app/health.py`, `app/preflight.py`, `app/crash.py` — health/preflight/redacted crash diagnostics.
+- `app/health.py`, `app/preflight.py`, `app/crash.py` — health/preflight/redacted diagnostics.
 
 ## 0.9 Guest Bot data sources
-
 ```text
 room URL /join/<slug>
   -> parse_dion_join_url()
@@ -61,12 +60,12 @@ room URL /join/<slug>
 
 optional IAPI token+mTLS+base URL
   -> list_event_users_by_slug(slug)
-  -> metadata/roster hint only; is_active is unknown
+  -> metadata/roster hint only; current presence is not assumed
 
 optional DionBrowserAdapter
-  -> explicit data-participant-id/data-user-id
-  -> explicit data-speaking/data-is-speaking/data-active-speaker or speaking ARIA
-  -> live UI indicator only until timing calibration
+  -> explicit participant/user IDs + names
+  -> explicit speaking data/ARIA
+  -> live indicator only until timing calibration
 
 meeting audio
   -> Windows WASAPI Loopback
@@ -74,17 +73,20 @@ meeting audio
   -> optional local diarization/Voice ID fallback
 ```
 
-Do not equate slug metadata with current room presence. Do not equate microphone enabled with speaking.
+Do not equate slug metadata with current room presence. Do not equate microphone-enabled state with speaking.
 
 ## Tests and release gates
+Current published release: **v0.9-guest-secretary-bot**.
 
-0.9 reconstructed development source: **36/36 tests passed** plus compileall.
+Validation:
+- reconstructed source: `36/36 tests passed` + compileall;
+- PR Windows CI `33150603611`: source validation, pinned models, EXE build and packaged self-test passed;
+- production Windows CI `33150927129`: source validation, pinned models, EXE build, packaged self-test and GitHub Release publication passed.
 
-Important 0.9 suites/symbol checks include:
-- `tests/test_guest_bot_09.py` — corporate `/join/<slug>` parsing, no-token guest mode, slug API semantics, manual fallback and UI-primary-flow assertions;
-- existing `test_visual_refresh.py`, `test_dion_api.py`, `test_dion_bot.py`, `test_transcriber_quality.py`, speaker/storage suites.
+Published artifact:
+`DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`, `627,722,376 bytes`, SHA-256 `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`.
 
-Published `v0.8-visual-refresh` remains the current release until 0.9 passes Windows PR CI, merge, production CI, packaged `--portable-selftest` and Release publication.
+Field DION/WASAPI/browser semantics remain separate from CI.
 
 ## Routing
 | Task | Read first | Main code |
@@ -102,4 +104,4 @@ Published `v0.8-visual-refresh` remains the current release until 0.9 passes Win
 | History | `VERSION_JOURNAL.md` | referenced paths |
 | Published EXE/SHA | `RELEASES.md` | GitHub Release |
 
-If a module responsibility, patch order, key symbol or canonical document changes, update this map in the same task. GitHub visibility/default branch/branch protection are external settings and must not be claimed fixed without verification.
+If module responsibility, patch order or key symbols change, update this map in the same task. GitHub visibility/default branch/branch protection are external settings and must not be claimed fixed without verification.
