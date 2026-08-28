@@ -7,7 +7,7 @@ import sys
 import tarfile
 from pathlib import Path
 
-PARTS = [f"part{i:02d}" for i in range(7)]
+PARTS = ["part00", "part01", "part02", "part03", "part04", "part05", "part06a", "part06b"]
 
 
 def _safe_members(archive: tarfile.TarFile, target: Path):
