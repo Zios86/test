@@ -10,7 +10,7 @@ Keep this file short. Canonical facts live in `docs/`.
 5. Use `.claude/skills/` when a Skill matches the task.
 
 ## Build-branch model
-`dion-exe-build` applies `apply_051.py -> apply_060.py -> apply_070.py -> apply_071.py -> apply_080.py -> apply_090.py -> apply_091.py` to the reconstructed base source. Do not read every encoded part for orientation.
+`dion-exe-build` applies `apply_051.py -> apply_060.py -> apply_070.py -> apply_071.py -> apply_080.py -> apply_090.py -> apply_091.py -> apply_100.py` to the reconstructed base source. Do not read every encoded part for orientation.
 
 ## Current release
 **v0.9-guest-secretary-bot** is published.
