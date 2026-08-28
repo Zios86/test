@@ -1,11 +1,11 @@
 # Roadmap
 
 ## Current line
-**0.9 Guest Secretary Bot — published**.
+**1.0 Post-meeting Precision — published** (`v1.0-post-meeting-precision`).
 
 **0.9.1 Browser Gate Hotfix — implemented/tested, release validation pending**. It handles the field-confirmed «Продолжить в браузере» gate before the guest-name form.
 
-**1.0 Post-meeting Precision — implemented locally, release validation pending**. It records the original audio and adds an optional private-LAN faster-whisper + Ollama final pass without replacing the live transcript.
+**1.0.1 Audit Hardening — implemented locally, Windows release validation pending**. It hardens input validation, queueing, WAV fault isolation and draft/precise transcript fusion. TLS/VPN and automatic retention remain explicitly out of scope.
 
 Release: `v0.9-guest-secretary-bot`. Exact artifact metadata is in `RELEASES.md`.
 

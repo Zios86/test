@@ -2,7 +2,15 @@
 
 All notable user-visible changes to DION Meeting Assistant are recorded here.
 
-## 1.0 Post-meeting Precision — release validation pending
+## 1.0.1 Audit Hardening — release validation pending
+
+- Изолирован отказ непрерывной WAV-записи от live-STT.
+- Закрыты обход manifest/ZIP и неконтролируемая параллельная загрузка faster-whisper.
+- Черновая и точная стенограммы сопоставляются с сохранением спикеров; опасные правки Ollama отклоняются.
+- Добавлены сквозной HTTP-тест и сценарий полевых проверок 15/60/120 минут.
+- Пункт аудита 5 (TLS/VPN и автоматическая политика хранения) исключён по решению владельца.
+
+## 1.0 Post-meeting Precision — published
 
 - Added continuous, separate WAV recording for system audio and microphone while live transcription continues.
 - Added an explicit post-meeting action that packages the original draft transcript and audio without modifying either source.

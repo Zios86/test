@@ -2,7 +2,19 @@
 
 This file records actually published artifacts and their engineering meaning. GitHub Release is the source for the downloadable binary. Chronological engineering history, including unreleased work, lives in `VERSION_JOURNAL.md`.
 
-## v0.9-guest-secretary-bot — current published release
+## v1.0-post-meeting-precision — current published release
+
+Status: **published**. GitHub Release is the authoritative source for its EXE/server assets and hashes.
+
+Release page:
+
+```text
+https://github.com/Zios86/test/releases/tag/v1.0-post-meeting-precision
+```
+
+The immutable follow-up `v1.0.1-audit-hardening` is a candidate until Windows CI and release publication complete.
+
+## v0.9-guest-secretary-bot — previous published release
 
 Status: **published** on 2026-08-28.
 

@@ -2,16 +2,15 @@
 
 Windows-приложение для локальной стенографии ВКС DION, подготовки протокола, интеграции с DION и диагностики качества аудио/распознавания.
 
-Текущая **опубликованная** версия: **0.9 Guest Secretary Bot**.
+Текущая **опубликованная** версия: **1.0 Post-meeting Precision**. Версия **1.0.1 Audit Hardening** готовится как отдельный неизменяемый исправляющий релиз.
 
 ## Для человека
 
 ### Опубликованный релиз
 
-- Release: `v0.9-guest-secretary-bot`.
-- Portable EXE: `DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
-- Release page: `https://github.com/Zios86/test/releases/tag/v0.9-guest-secretary-bot`.
-- Direct download: `https://github.com/Zios86/test/releases/download/v0.9-guest-secretary-bot/DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe`.
+- Release: `v1.0-post-meeting-precision`.
+- Release page: `https://github.com/Zios86/test/releases/tag/v1.0-post-meeting-precision`.
+- Исправляющая линия: `v1.0.1-audit-hardening` (после прохождения Windows CI).
 - Size: `627,722,376 bytes`.
 - SHA-256: `3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22`.
 - Target commit: `f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6`.

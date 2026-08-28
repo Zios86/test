@@ -1,7 +1,7 @@
 # Current execution plan
 
 ## Objective
-Build and publish **DION Meeting Assistant 1.0 Post-meeting Precision** plus its Windows post-processing server, then field-validate recording and batch processing between the DION workstation and `192.168.1.128`.
+Build and publish **DION Meeting Assistant 1.0.1 Audit Hardening**, then field-validate recording and batch processing between the DION workstation and `192.168.1.128`.
 
 ## Implemented 1.0 scope
 - continuous separate system/microphone WAV evidence alongside live STT;
@@ -10,18 +10,15 @@ Build and publish **DION Meeting Assistant 1.0 Post-meeting Precision** plus its
 - server-side faster-whisper `large-v3-turbo` CPU/int8 retranscription;
 - conservative Ollama `qwen3:4b` correction with precise-result fallback;
 - separate result directory and comparison/review metadata;
-- 42 automated tests plus compileall locally; Windows release gates pending.
+- 46 automated tests plus compileall locally; Windows release gates pending.
 
 ## Published baseline
 ```text
-v0.9-guest-secretary-bot
-DION_Meeting_Assistant_0.9_Guest_Secretary_Bot_Portable.exe
-Size: 627,722,376 bytes
-SHA-256: 3e57b7c1fac965a14518d6eecc86642bcd3367af1fcf66af01e71142c09aef22
-Target commit: f5ae18ef98d26236e9c7f5f42aa5b7e685c5a7e6
+v1.0-post-meeting-precision
+DION_Meeting_Assistant_1.0_Post_Meeting_Precision_Portable.exe
 ```
 
-Release page: `https://github.com/Zios86/test/releases/tag/v0.9-guest-secretary-bot`.
+Release page: `https://github.com/Zios86/test/releases/tag/v1.0-post-meeting-precision`.
 
 ## Completed release gates
 - reconstructed source: `36/36 tests passed`, compileall passed;

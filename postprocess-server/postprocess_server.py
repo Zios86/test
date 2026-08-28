@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import queue
 import json
 import os
+import re
 import secrets
 import shutil
 import threading
+import time
 import urllib.request
 import uuid
 import zipfile
 from dataclasses import dataclass, field
+from datetime import datetime
 from difflib import SequenceMatcher
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -25,6 +29,10 @@ class Job:
     message: str = "Задание ожидает обработки"
     error: str = ""
     result: Path | None = None
+    submitted_at: str = field(default_factory=lambda: datetime.now().astimezone().isoformat(timespec="seconds"))
+    started_at: str = ""
+    finished_at: str = ""
+    processing_seconds: float = 0.0
 
 
 @dataclass
@@ -41,13 +49,32 @@ class ServerState:
     lock: threading.Lock = field(default_factory=threading.Lock)
     model: Any = None
     model_lock: threading.Lock = field(default_factory=threading.Lock)
+    job_queue: queue.Queue[Job] = field(default_factory=lambda: queue.Queue(maxsize=8))
+
+
+ALLOWED_REQUEST_FILES = {
+    "manifest.json",
+    "transcript_autosave.json",
+    "system_audio.wav",
+    "microphone_audio.wav",
+}
+MAX_UNPACKED_BYTES = 6 * 1024 * 1024 * 1024
+SERVER_VERSION = "1.0.1"
 
 
 def safe_extract(payload: bytes | Path, destination: Path) -> None:
     source = payload if isinstance(payload, Path) else __import__("io").BytesIO(payload)
     with zipfile.ZipFile(source) as archive:
         root = destination.resolve()
-        for member in archive.infolist():
+        members = archive.infolist()
+        names = [member.filename for member in members]
+        if len(names) != len(set(names)):
+            raise ValueError("Архив содержит повторяющиеся имена файлов")
+        if not names or any(name not in ALLOWED_REQUEST_FILES for name in names):
+            raise ValueError("Архив содержит неожиданные файлы")
+        if sum(member.file_size for member in members) > MAX_UNPACKED_BYTES:
+            raise ValueError("Распакованный пакет превышает допустимый размер")
+        for member in members:
             target = (root / member.filename).resolve()
             try:
                 target.relative_to(root)
@@ -56,6 +83,36 @@ def safe_extract(payload: bytes | Path, destination: Path) -> None:
             if member.file_size > 4 * 1024 * 1024 * 1024:
                 raise ValueError("Один из файлов превышает допустимый размер")
         archive.extractall(destination)
+
+
+def safe_request_file(request_dir: Path, name: object, allowed: set[str]) -> Path:
+    value = str(name or "")
+    if value not in allowed:
+        raise ValueError(f"Недопустимое имя файла в manifest: {value!r}")
+    target = (request_dir / value).resolve()
+    try:
+        target.relative_to(request_dir.resolve())
+    except ValueError as exc:
+        raise ValueError("Путь из manifest выходит за пределы задания") from exc
+    if not target.is_file():
+        raise ValueError(f"Файл из manifest не найден: {value}")
+    return target
+
+
+def validate_manifest(request_dir: Path, manifest: object) -> tuple[Path, list[Path]]:
+    if not isinstance(manifest, dict) or manifest.get("format") != "dion-postprocess-1":
+        raise ValueError("Неподдерживаемый формат manifest")
+    transcript = safe_request_file(request_dir, manifest.get("transcript"), {"transcript_autosave.json"})
+    audio_names = manifest.get("audio")
+    if not isinstance(audio_names, list) or not 1 <= len(audio_names) <= 2:
+        raise ValueError("Manifest должен содержать одну или две WAV-дорожки")
+    if len(audio_names) != len(set(map(str, audio_names))):
+        raise ValueError("Manifest содержит повторяющиеся WAV-дорожки")
+    audio = [
+        safe_request_file(request_dir, name, {"system_audio.wav", "microphone_audio.wav"})
+        for name in audio_names
+    ]
+    return transcript, audio
 
 
 def load_model(state: ServerState):
@@ -97,10 +154,63 @@ def transcribe_audio(state: ServerState, path: Path, source: str, job: Job) -> l
     return rows
 
 
+def _source_key(value: object) -> str:
+    text = str(value or "").casefold()
+    return "microphone" if "microphone" in text else "system"
+
+
+def align_draft(rows: list[dict], draft: dict) -> None:
+    try:
+        started_at = datetime.fromisoformat(str(draft.get("started_at") or ""))
+    except ValueError:
+        started_at = None
+    candidates: list[dict] = []
+    for index, entry in enumerate(draft.get("entries") or []):
+        if not isinstance(entry, dict) or not str(entry.get("text") or "").strip():
+            continue
+        offset = None
+        if started_at is not None:
+            try:
+                offset = max(0.0, (datetime.fromisoformat(str(entry.get("timestamp"))) - started_at).total_seconds())
+            except ValueError:
+                pass
+        candidates.append({
+            "index": index,
+            "source": _source_key(entry.get("source")),
+            "offset": offset,
+            "text": " ".join(str(entry.get("text") or "").split()),
+            "speaker": str(entry.get("speaker_display") or entry.get("speaker") or "").strip(),
+        })
+    for row in rows:
+        same_source = [item for item in candidates if item["source"] == _source_key(row.get("source"))]
+        best = None
+        best_score = -1.0
+        for item in same_source:
+            similarity = SequenceMatcher(None, row["text_whisper"].casefold(), item["text"].casefold()).ratio()
+            time_score = 0.0
+            if item["offset"] is not None:
+                time_score = max(0.0, 1.0 - abs(float(row["start"]) - float(item["offset"])) / 30.0)
+            score = similarity * 0.65 + time_score * 0.35
+            if score > best_score:
+                best, best_score = item, score
+        row["text_draft"] = best["text"] if best and best_score >= 0.18 else ""
+        row["speaker"] = best["speaker"] if best and best_score >= 0.18 else ""
+        row["draft_alignment_score"] = round(max(0.0, best_score), 4)
+
+
 def ollama_correct_batch(state: ServerState, rows: list[dict]) -> list[str] | None:
-    source = [row["text_whisper"] for row in rows]
+    source = [
+        {
+            "whisper": row["text_whisper"],
+            "draft": row.get("text_draft", ""),
+            "speaker": row.get("speaker", ""),
+        }
+        for row in rows
+    ]
     prompt = (
-        "Ты корректор русской стенограммы. Исправь только очевидные ошибки распознавания, пунктуацию и написание терминов. "
+        "Ты корректор русской стенограммы. Для каждой строки сопоставь точный повторный Whisper-текст с черновой live-стенограммой. "
+        "Исправь только очевидные ошибки распознавания, пунктуацию и написание терминов. Черновик используй как подсказку, "
+        "но не переноси из него слова, которые противоречат Whisper-тексту. "
         "Не добавляй факты, фамилии, числа, даты, сроки или поручения. Сохрани количество и порядок строк. "
         "Если исправление неочевидно, оставь исходный текст. Верни только JSON-массив строк.\n"
         + json.dumps(source, ensure_ascii=False)
@@ -130,19 +240,26 @@ def ollama_correct_batch(state: ServerState, rows: list[dict]) -> list[str] | No
     return None
 
 
+def _critical_tokens(text: str) -> list[str]:
+    return re.findall(r"(?<!\w)\d+(?:[.,:/-]\d+)*(?!\w)", text.casefold())
+
+
 def run_job(state: ServerState, job: Job) -> None:
+    started = time.monotonic()
+    job.started_at = datetime.now().astimezone().isoformat(timespec="seconds")
     try:
         job.status = "processing"
         request_dir = job.directory / "request"
         manifest = json.loads((request_dir / "manifest.json").read_text(encoding="utf-8"))
-        transcript_path = request_dir / str(manifest["transcript"])
+        transcript_path, audio_paths = validate_manifest(request_dir, manifest)
         draft = json.loads(transcript_path.read_text(encoding="utf-8"))
+        if not isinstance(draft, dict) or not isinstance(draft.get("entries"), list):
+            raise ValueError("Черновая стенограмма имеет неверный формат")
         rows: list[dict] = []
-        for name in manifest.get("audio", []):
-            audio_path = request_dir / str(name)
-            if audio_path.is_file():
-                rows.extend(transcribe_audio(state, audio_path, audio_path.stem, job))
+        for audio_path in audio_paths:
+            rows.extend(transcribe_audio(state, audio_path, audio_path.stem, job))
         rows.sort(key=lambda row: (row["start"], row["source"]))
+        align_draft(rows, draft)
         job.message = "Ollama исправляет формулировки без изменения фактов…"
         ollama_available = True
         for offset in range(0, len(rows), 12):
@@ -152,9 +269,17 @@ def run_job(state: ServerState, job: Job) -> None:
                 ollama_available = False
                 break
             for row, text in zip(batch, corrected):
-                row["text_corrected"] = text
                 ratio = SequenceMatcher(None, row["text_whisper"].casefold(), text.casefold()).ratio()
-                row["needs_review"] = ratio < 0.55
+                changed_numbers = _critical_tokens(row["text_whisper"]) != _critical_tokens(text)
+                if ratio < 0.55 or changed_numbers:
+                    row["suggested_text"] = text
+                    row["text_corrected"] = row["text_whisper"]
+                    row["needs_review"] = True
+                    row["correction_status"] = "rejected_numbers" if changed_numbers else "rejected_large_change"
+                else:
+                    row["text_corrected"] = text
+                    row["needs_review"] = False
+                    row["correction_status"] = "applied" if text != row["text_whisper"] else "unchanged"
         draft_text = " ".join(str(item.get("text") or "") for item in draft.get("entries", []))
         precise_text = " ".join(row["text_whisper"] for row in rows)
         comparison = {
@@ -163,12 +288,16 @@ def run_job(state: ServerState, job: Job) -> None:
             "overall_similarity": round(SequenceMatcher(None, draft_text.casefold(), precise_text.casefold()).ratio(), 4),
             "ollama_applied": ollama_available,
             "review_segments": sum(1 for row in rows if row["needs_review"]),
+            "processing_seconds": round(time.monotonic() - started, 3),
             "note": "Исходная стенограмма не изменялась. Низкоуверенные исправления требуют прослушивания аудио.",
         }
         result_dir = job.directory / "result"
         result_dir.mkdir(parents=True, exist_ok=True)
         (result_dir / "precise_transcript.json").write_text(json.dumps({"segments": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
-        lines = [f"[{row['start']:09.3f}] {row['source']}: {row['text_corrected']}" for row in rows]
+        lines = [
+            f"[{row['start']:09.3f}] {row.get('speaker') or row['source']}: {row['text_corrected']}"
+            for row in rows
+        ]
         (result_dir / "corrected_transcript.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
         (result_dir / "comparison.json").write_text(json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8")
         result_zip = job.directory / "postprocess_result.zip"
@@ -182,6 +311,18 @@ def run_job(state: ServerState, job: Job) -> None:
         job.status = "failed"
         job.error = f"{type(exc).__name__}: {exc}"
         job.message = "Обработка завершилась ошибкой"
+    finally:
+        job.processing_seconds = round(time.monotonic() - started, 3)
+        job.finished_at = datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def job_worker(state: ServerState) -> None:
+    while True:
+        job = state.job_queue.get()
+        try:
+            run_job(state, job)
+        finally:
+            state.job_queue.task_done()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -213,7 +354,13 @@ class Handler(BaseHTTPRequestHandler):
             if not self._authorized():
                 self._json(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
                 return
-            self._json(HTTPStatus.OK, {"status": "ok", "model": self.state.whisper_model, "ollama_model": self.state.ollama_model})
+            self._json(HTTPStatus.OK, {
+                "status": "ok",
+                "server_version": SERVER_VERSION,
+                "model": self.state.whisper_model,
+                "ollama_model": self.state.ollama_model,
+                "queued_jobs": self.state.job_queue.qsize(),
+            })
             return
         if not self._authorized():
             self._json(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
@@ -235,7 +382,16 @@ class Handler(BaseHTTPRequestHandler):
                 with job.result.open("rb") as source:
                     shutil.copyfileobj(source, self.wfile, length=1024 * 1024)
                 return
-            self._json(HTTPStatus.OK, {"job_id": job.job_id, "status": job.status, "message": job.message, "error": job.error})
+            self._json(HTTPStatus.OK, {
+                "job_id": job.job_id,
+                "status": job.status,
+                "message": job.message,
+                "error": job.error,
+                "submitted_at": job.submitted_at,
+                "started_at": job.started_at,
+                "finished_at": job.finished_at,
+                "processing_seconds": job.processing_seconds,
+            })
             return
         self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
 
@@ -272,7 +428,14 @@ class Handler(BaseHTTPRequestHandler):
         job = Job(job_id, directory)
         with self.state.lock:
             self.state.jobs[job_id] = job
-        threading.Thread(target=run_job, args=(self.state, job), daemon=True, name=f"postprocess-{job_id[:8]}").start()
+        try:
+            self.state.job_queue.put_nowait(job)
+        except queue.Full:
+            with self.state.lock:
+                self.state.jobs.pop(job_id, None)
+            shutil.rmtree(directory, ignore_errors=True)
+            self._json(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "job_queue_full"})
+            return
         self._json(HTTPStatus.ACCEPTED, {"job_id": job_id, "status": job.status})
 
 
@@ -300,6 +463,7 @@ def main() -> int:
     root = Path(args.data_dir).resolve()
     root.mkdir(parents=True, exist_ok=True)
     state = ServerState(root, args.token, set(args.allow_client), args.whisper_model, args.device, args.compute_type, args.ollama_url, args.ollama_model)
+    threading.Thread(target=job_worker, args=(state,), daemon=True, name="postprocess-worker").start()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.state = state  # type: ignore[attr-defined]
     print(f"DION Postprocess Server: http://{args.host}:{args.port}")
