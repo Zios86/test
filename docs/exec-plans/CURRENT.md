@@ -1,7 +1,16 @@
 # Current execution plan
 
 ## Objective
-Build and publish **DION Meeting Assistant 0.9.1 Browser Gate Hotfix**, then field-validate the confirmed two-stage corporate DION entry flow on the target Windows workstation.
+Build and publish **DION Meeting Assistant 1.0 Post-meeting Precision** plus its Windows post-processing server, then field-validate recording and batch processing between the DION workstation and `192.168.1.128`.
+
+## Implemented 1.0 scope
+- continuous separate system/microphone WAV evidence alongside live STT;
+- explicit packaging of audio plus the immutable draft transcript;
+- authenticated private-IP streaming upload and asynchronous progress;
+- server-side faster-whisper `large-v3-turbo` CPU/int8 retranscription;
+- conservative Ollama `qwen3:4b` correction with precise-result fallback;
+- separate result directory and comparison/review metadata;
+- 42 automated tests plus compileall locally; Windows release gates pending.
 
 ## Published baseline
 ```text
