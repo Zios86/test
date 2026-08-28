@@ -4,7 +4,75 @@ This file records published artifacts and the engineering meaning of each releas
 
 For chronological engineering history, including unreleased significant updates, use `VERSION_JOURNAL.md`.
 
-## v0.7.1 — current release
+## v0.8-visual-refresh — current release
+
+Status: **published** on 2026-08-28.
+
+Artifact:
+
+```text
+DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe
+```
+
+Size:
+
+```text
+627,541,530 bytes
+```
+
+SHA-256:
+
+```text
+0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9
+```
+
+Release page:
+
+```text
+https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh
+```
+
+Direct asset:
+
+```text
+https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe
+```
+
+Target commit:
+
+```text
+b7ee9bb5017348a83b99e48246a65c5309d35315
+```
+
+Key behavior:
+
+- native PySide6/QSS modern light application shell;
+- seven-page left navigation: Meeting, Transcript, Protocol, Participants, Secretary Bot, Diagnostics, Settings;
+- card-based live transcript with active-speaker and overlap/interruption states;
+- top live-status bar for meeting/recording/audio/DION state;
+- right summary rail for participant count, active speaker, audio quality, protocol readiness and hotwords;
+- persistent bottom quick actions for Start/Stop, DOCX export and protocol access;
+- dedicated Secretary Bot visual status card/page;
+- 0.7.1 Hardening behavior preserved: offline STT, shared PortAudio safety, DION mTLS, opt-in diarization, active-only Voice ID and DPAPI-protected persistent voice profiles.
+
+Build validation:
+
+- local visual-refresh workspace: 48/48 tests + compileall passed;
+- visual PR build `33129215245`: source checks, Qt offscreen MainWindow smoke, pinned models, EXE build and packaged self-test passed;
+- initial production build `33129501062`: application/model/build/self-test gates passed, but publication stopped at the old release-existence guard;
+- release-guard PR build `33145190036`: passed after the workflow-only fix;
+- final production build `33145419554`: all gates passed, Release publication succeeded, Actions artifact upload succeeded.
+
+Field limitation:
+
+- CI does not prove exact visual/usability behavior on the target Windows resolution/DPI;
+- corporate DION/mTLS/WASAPI and real speaker-attribution accuracy remain field-test pending.
+
+Rollback: `v0.7.1`.
+
+Journal entry: `VERSION_JOURNAL.md` -> `2026-08-28.03`.
+
+## v0.7.1
 
 Status: **published** on 2026-08-28 (Europe/Tallinn local date; GitHub published at 2026-08-27 23:39:19 UTC).
 
