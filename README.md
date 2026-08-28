@@ -2,18 +2,21 @@
 
 Windows-приложение для локальной стенографии ВКС DION, подготовки протокола, интеграции с DION и диагностики качества аудио/распознавания.
 
-Текущая опубликованная версия: **0.7.1 Hardening**.
+Текущая опубликованная версия: **0.8 Visual Refresh**.
 
 ## Для человека
 
-- Последний релиз: `v0.7.1`.
-- Portable EXE: `DION_Meeting_Assistant_0.7.1_Hardening_Portable.exe`.
-- Release: `https://github.com/Zios86/test/releases/tag/v0.7.1`.
-- SHA-256: `90751e2d7a71a5bbcf3e3f0e185284ba08099244779ad8174f0afb89ada04239`.
+- Последний релиз: `v0.8-visual-refresh`.
+- Portable EXE: `DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
+- Release: `https://github.com/Zios86/test/releases/tag/v0.8-visual-refresh`.
+- Прямая загрузка: `https://github.com/Zios86/test/releases/download/v0.8-visual-refresh/DION_Meeting_Assistant_0.8_Visual_Refresh_Portable.exe`.
+- Размер: `627,541,530 bytes`.
+- SHA-256: `0ea963916ecf00d9bf9ef219377e709718d1c5d458ec656fc54f5527d43f3fa9`.
 - Portable EXE содержит offline Whisper `small`; облачный STT не требуется.
 - Основной режим: системный звук Windows через WASAPI Loopback + отдельный микрофон пользователя.
-- DION 0.7/0.7.1 добавляет Секретаря-бота, participant/session roster, mTLS-конфигурацию и более безопасную локальную speaker-attribution архитектуру.
-- Корпоративная DION/mTLS/WASAPI полевая проверка остаётся отдельным этапом и не считается доказанной только по CI.
+- 0.8 переносит одобренный современный интерфейс в native PySide6/QSS: левая навигация, карточки стенограммы, верхняя статус-панель, правая сводка и нижняя панель быстрых действий.
+- Hardening 0.7.1 сохранён: DION mTLS, opt-in diarization, active-only Voice ID, DPAPI-защита persistent voice profiles, Secretary Bot lifecycle hardening.
+- Корпоративная DION/mTLS/WASAPI и визуальная проверка на целевом АРМ остаются отдельным полевым этапом и не считаются доказанными только по CI.
 
 ## Для Claude, ChatGPT, Codex и других ИИ
 
@@ -35,7 +38,8 @@ Windows-приложение для локальной стенографии В
 - `dion-quality/apply_060.py` — recognition quality 0.6;
 - `dion-secretary-bot/apply_070.py` — DION Secretary Bot/roster/speaker fallback 0.7;
 - `dion-hardening/apply_071.py` — mTLS/privacy/lifecycle/speaker/release hardening 0.7.1;
-- `.github/workflows/build-dion-portable.yml` — восстановление проекта, применение патчей, locked dependencies, pinned offline models, PyInstaller, self-test и публикация Release.
+- `dion-visual/apply_080.py` — native PySide6 visual refresh 0.8;
+- `.github/workflows/build-dion-portable.yml` — восстановление проекта, применение патчей, locked dependencies, pinned offline models, Qt offscreen smoke-test, PyInstaller, packaged self-test и публикация Release.
 
 Не изучайте `part*` по одному. Логическая карта восстановленного Python-проекта находится в `docs/PROJECT_MAP.md`.
 
@@ -45,6 +49,7 @@ Windows-приложение для локальной стенографии В
 - `docs/PROJECT_MAP.md` — куда идти за конкретной функцией;
 - `docs/ARCHITECTURE.md` — архитектура и потоки данных;
 - `docs/DEVELOPMENT.md` — запуск, тесты, зависимости, модели и сборка;
+- `docs/design-docs/UI_VISUAL_SYSTEM.md` — каноническая дизайн-система 0.8;
 - `docs/design-docs/DION_INTEGRATION.md` — DION IAPI/mTLS/Секретарь-бот;
 - `docs/design-docs/SPEAKER_IDENTIFICATION.md` — diarization/Voice ID/overlap;
 - `docs/design-docs/SPEECH_RECOGNITION.md` — Whisper/VAD/context;
@@ -56,7 +61,7 @@ Windows-приложение для локальной стенографии В
 - `docs/ROADMAP.md` — текущее состояние и следующие шаги;
 - `CHANGELOG.md` — история пользовательских изменений.
 
-## Проверка 0.7.1
+## Проверка 0.8
 
 Для восстановленного исходника основной тестовый набор:
 
@@ -64,17 +69,21 @@ Windows-приложение для локальной стенографии В
 python -m pytest -q
 ```
 
-0.7.1 reconstructed-source baseline: **46 тестов**.
+При разработке visual refresh локальный рабочий набор прошёл **48/48 тестов** и `compileall`.
 
-Опубликованный `v0.7.1` дополнительно прошёл:
+Опубликованный `v0.8-visual-refresh` дополнительно прошёл:
 
-- Windows PR CI run `33126146077`;
-- production Windows CI run `33126756679`;
+- первоначальный Windows PR CI `33129215245`;
+- release-guard PR CI `33145190036`;
+- финальный production Windows CI `33145419554`;
 - locked dependency validation;
 - pinned offline-model verification;
+- Qt `offscreen` construction smoke-test для нового `MainWindow`;
 - one-file EXE build;
 - packaged `--portable-selftest`;
 - успешную публикацию GitHub Release.
+
+Первый production-run `33129501062` также успешно дошёл до EXE/self-test, но был остановлен ошибкой release-existence guard; этот guard исправлен PR #3 до финальной публикации.
 
 ## Репозиторий
 
