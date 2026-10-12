@@ -1,0 +1,36 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Тесты ядра
+        run: dotnet test tests/FileOrganizer.Core.Tests -c Release --filter "Category!=Stress"
+      - name: Сборка приложения (один exe, без установки .NET)
+        run: dotnet publish src/FileOrganizer.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o artifacts/FileOrganizer-win-x64
+      - name: Сборка консольной версии
+        run: dotnet publish src/FileOrganizer.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o artifacts/fo-cli-win-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FileOrganizer-win-x64
+          path: artifacts/
+
+  stress:
+    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Нагрузочный тест (100 000+ файлов)
+        run: dotnet test tests/FileOrganizer.Core.Tests -c Release --filter "Category=Stress" --logger "console;verbosity=detailed"

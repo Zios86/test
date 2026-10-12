@@ -58,4 +58,30 @@ public class StressTests(ITestOutputHelper output)
         Assert.Equal(before, Snapshot.Take(t.Path));
         output.WriteLine($"Выполнение + откат: {sw.Elapsed}");
     }
+
+    [Fact]
+    public void File_larger_than_10_GB_is_scanned_bucketed_moved_and_restored()
+    {
+        using var t = new TempDir();
+        var path = t.P("video.mkv");
+        const long size = 11L * 1024 * 1024 * 1024;
+        try
+        {
+            using var fs = new FileStream(path, FileMode.CreateNew);
+            fs.SetLength(size); // разреженный файл: место на диске не занимает
+        }
+        catch (IOException) { return; } // файловая система не поддерживает такие файлы
+        var scan = t.Scan();
+        Assert.Equal(size, scan.Files.Single().Size);
+        Assert.Equal(1, SpaceAnalyzer.SizeBuckets(scan.Files).Single(b => b.Label == "> 10 ГБ").Count);
+
+        var b = new PlanBuilder(t.Path);
+        OperationPlanner.PlanSort(b, scan, new SortOptions { Strategy = SortStrategy.ByType });
+        var db = t.Db();
+        var r = new OperationExecutor(db) { SimulationMode = false }.Execute(b.Plan);
+        Assert.Equal(0, r.Failed);
+        Assert.Equal(size, new FileInfo(t.P("Видео/video.mkv")).Length);
+        new RollbackManager(db).RollbackBatch(r.BatchId);
+        Assert.Equal(size, new FileInfo(path).Length);
+    }
 }

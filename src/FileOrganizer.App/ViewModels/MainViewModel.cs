@@ -259,9 +259,13 @@ public sealed class MainViewModel : ObservableObject
 
     public void SetFolder(string f)
     {
-        if (SystemPathGuard.IsProtectedPath(f) || SystemPathGuard.IsProtectedFolder(f))
+        // Диск с данными (D:\) выбрать можно; системный диск целиком и системные папки — нельзя.
+        var driveRoot = Path.GetPathRoot(f);
+        bool isDriveRoot = driveRoot != null && PathUtil.SamePath(driveRoot, f);
+        bool isSystemDrive = isDriveRoot && PathUtil.SamePath(driveRoot!, Path.GetPathRoot(Environment.SystemDirectory) ?? "");
+        if (isSystemDrive || (!isDriveRoot && SystemPathGuard.IsProtectedFolder(f)))
         {
-            AppServices.Info("Это системная папка. Программа не анализирует и не изменяет системные каталоги (Windows, Program Files, AppData и т. п.).");
+            AppServices.Info("Это системный диск или системная папка. Программа не анализирует и не изменяет системные каталоги (Windows, Program Files, AppData и т. п.). Выберите папку с вашими файлами.");
             return;
         }
         Folder = f;
