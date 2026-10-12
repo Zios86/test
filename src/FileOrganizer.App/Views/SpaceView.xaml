@@ -1,0 +1,52 @@
+<UserControl x:Class="FileOrganizer.App.Views.SpaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Что занимает место" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Самые крупные файлы и распределение места. Большой файл — не значит ненужный: решение за вами."/>
+        </StackPanel>
+        <TabControl>
+            <TabItem Header="Топ-100 файлов">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <ItemsControl ItemsSource="{Binding Buckets}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Card}" Width="150" Padding="12,8">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Label}" Style="{StaticResource Caption}"/>
+                                            <TextBlock Text="{Binding Count}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Text="{Binding TotalBytes, Converter={StaticResource Size}}" Style="{StaticResource Caption}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </WrapPanel>
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,12,8"/>
+                        <Button Content="Переместить в архив (99_Архив)" Command="{Binding ArchiveCommand}"/>
+                        <Button Content="Удалить отмеченные (в папку восстановления)" Command="{Binding ToRecoveryCommand}" Style="{StaticResource DangerButton}"/>
+                    </WrapPanel>
+                    <ListBox ItemsSource="{Binding Rows}" Style="{StaticResource PlainList}" ItemTemplate="{StaticResource FileRowTemplate}"/>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Диаграмма">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="По типам файлов" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                            <ItemsControl ItemsSource="{Binding Categories}" ItemTemplate="{StaticResource BarTemplate}"/>
+                        </Border>
+                        <TextBlock Text="Самые большие папки первого уровня" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource Card}" Margin="0">
+                            <ItemsControl ItemsSource="{Binding Folders}" ItemTemplate="{StaticResource BarTemplate}"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

@@ -88,6 +88,8 @@ public sealed class OperationRecord
     public string Destination { get; set; } = "";
     public string OldName => Path.GetFileName(Source);
     public string NewName => Path.GetFileName(Destination);
+    /// <summary>Краткое описание для истории: «a.pdf → b.pdf» или просто имя папки.</summary>
+    public string Title => Kind is OperationKind.CreateFolder or OperationKind.DeleteEmptyFolder || OldName == NewName ? OldName : $"{OldName}  →  {NewName}";
     public OperationStatus Status { get; set; }
     public string? Error { get; set; }
     public string? Reason { get; set; }

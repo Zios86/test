@@ -230,11 +230,18 @@ public static class OperationPlanner
     public static OperationPlan PlanTidyUp(AnalysisReport report, SortOptions sort, SmartClassifier? smart = null, RulesEngine? rules = null, string? recoveryFolder = null)
     {
         var b = new PlanBuilder(report.Scan.RootPath, recoveryFolder, $"Наведение порядка: {Path.GetFileName(report.Scan.RootPath)}");
-        PlanSort(b, report.Scan, sort, smart, rules, report.Projects);
+        PlanTidyUp(b, report, sort, smart, rules);
+        return b.Plan;
+    }
+
+    public static void PlanTidyUp(PlanBuilder b, AnalysisReport report, SortOptions sort, SmartClassifier? smart = null, RulesEngine? rules = null)
+    {
+        // Сначала дубликаты: лишняя копия не должна сортироваться вместе с оригиналом.
         foreach (var g in report.Duplicates) PlanDuplicates(b, g, DuplicateDecision.KeepRecommended);
-        PlanEmptyFolders(b, report.EmptyFolders);
         foreach (var op in b.Plan.Operations.Where(o => o.Group is GroupDuplicates))
             op.Selected = false;
-        return b.Plan;
+        PlanSort(b, report.Scan, sort, smart, rules, report.Projects);
+        PlanEmptyFolders(b, report.EmptyFolders);
+        b.PruneUnusedFolders();
     }
 }

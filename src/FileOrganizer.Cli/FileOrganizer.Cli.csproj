@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>fo</AssemblyName>
+    <RootNamespace>FileOrganizer.Cli</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileOrganizer.Core\FileOrganizer.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,97 @@
+<UserControl x:Class="FileOrganizer.App.Views.DuplicatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Дубликаты" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="{Binding Summary}"/>
+        </StackPanel>
+        <TabControl>
+            <TabItem Header="Точные копии">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Button Content="Оставить рекомендуемые во всех группах" Command="{Binding ApplyRecommendationToAllCommand}"/>
+                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="4,0,0,8"
+                                   Text="★ — рекомендуемый экземпляр. Флажок «оставить» отмечает файлы, которые сохраняются."/>
+                    </WrapPanel>
+                    <ListBox ItemsSource="{Binding Groups}" Style="{StaticResource PlainList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Status}" Style="{StaticResource Caption}" Foreground="{DynamicResource SuccessBrush}" MaxWidth="380"/>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Header}" Style="{StaticResource Caption}" Margin="0,2,0,6"/>
+                                    <ItemsControl ItemsSource="{Binding Files}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox IsChecked="{Binding IsChecked}" ToolTip="Оставить этот файл" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="★" Width="16" Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center"
+                                                               Visibility="{Binding IsRecommended, Converter={StaticResource BoolToVis}}" ToolTip="Рекомендуется оставить"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding FullPath}" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding FullPath}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding Modified, Converter={StaticResource Date}}" Style="{StaticResource Caption}" Margin="12,0" VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="4" Style="{StaticResource LinkButton}" Content="показать" VerticalAlignment="Center"
+                                                            Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding Recommendation}" Style="{StaticResource Caption}" Margin="0,6,0,6"/>
+                                    <WrapPanel>
+                                        <Button Content="Оставить все" Command="{Binding DataContext.KeepBothCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        <Button Content="Оставить новый" Command="{Binding DataContext.KeepNewestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        <Button Content="Оставить старый" Command="{Binding DataContext.KeepOldestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        <Button Content="Оставить отмеченные, остальные удалить" ToolTip="Выбрать вручную: неотмеченные копии будут перемещены в папку восстановления"
+                                                Command="{Binding DataContext.KeepCheckedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        <Button Content="Переместить копии в «Дубликаты»" Command="{Binding DataContext.MoveToDuplicatesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Похожие версии документов">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Caption}" Margin="0,0,0,8"
+                               Text="«Отчёт.docx», «Отчёт (1).docx», «Отчёт_final.docx» — это НЕ дубликаты: содержимое различается. Сравните версии и решите сами."/>
+                    <ListBox ItemsSource="{Binding Versions}" Style="{StaticResource PlainList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Content="Сравнить первые две" Command="{Binding DataContext.CompareCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        <TextBlock Text="{Binding Header}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                    </DockPanel>
+                                    <ItemsControl ItemsSource="{Binding Files}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <DockPanel Margin="0,2">
+                                                    <TextBlock DockPanel.Dock="Right" Style="{StaticResource Caption}" Margin="12,0,0,0">
+                                                        <Run Text="{Binding Size, Mode=OneWay, Converter={StaticResource Size}}"/>
+                                                        <Run Text=" · изменён "/>
+                                                        <Run Text="{Binding Modified, Mode=OneWay, Converter={StaticResource Date}}"/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding FullPath}" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                                </DockPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

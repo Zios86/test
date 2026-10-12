@@ -1,0 +1,36 @@
+<UserControl x:Class="FileOrganizer.App.Views.OldFilesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Давно не использовались" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Файлы, которые давно не изменялись. Это не мусор — возможно, их стоит перенести в архив, чтобы не мешали."/>
+            <WrapPanel>
+                <ComboBox Width="200" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" DisplayMemberPath="Text" Margin="0,0,8,8"/>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsCustom, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="старше, дней:" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,6,8"/>
+                    <TextBox Width="80" Text="{Binding CustomDays, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                    <Button Content="Показать" Command="{Binding ApplyFilterCommand}"/>
+                </StackPanel>
+                <TextBlock Text="{Binding Summary}" Style="{StaticResource Body}" VerticalAlignment="Center" Margin="8,0,0,8"/>
+            </WrapPanel>
+            <WrapPanel>
+                <Button Content="Отметить все" Command="{Binding CheckAllCommand}"/>
+                <Button Content="Снять отметки" Command="{Binding UncheckAllCommand}"/>
+                <TextBlock Text="Папка архива:" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="8,0,6,8"/>
+                <TextBox Width="160" Text="{Binding ArchiveFolder, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                <Button Content="Перенести отмеченные в архив" Command="{Binding ArchiveCommand}" Style="{StaticResource AccentButton}"/>
+                <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="4,0,0,8"/>
+            </WrapPanel>
+        </StackPanel>
+        <TextBlock Style="{StaticResource EmptyState}" Text="Таких старых файлов нет — попробуйте другой период.">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource EmptyVis}">
+                    <Binding Path="Shell.HasReport"/>
+                    <Binding Path="Rows.Count"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Rows}" Style="{StaticResource PlainList}" ItemTemplate="{StaticResource FileRowTemplate}"/>
+    </DockPanel>
+</UserControl>

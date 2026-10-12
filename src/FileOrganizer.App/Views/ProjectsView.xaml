@@ -1,0 +1,47 @@
+<UserControl x:Class="FileOrganizer.App.Views.ProjectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Проекты" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Документы, таблицы, презентации, изображения и архивы, которые относятся к одному проекту. Их можно собрать в папку «Проекты/Проект_Название» с подпапками Документы, Данные, Презентации, Материалы, Архив."/>
+        </StackPanel>
+        <TextBlock Style="{StaticResource EmptyState}" Text="Проектных групп не найдено: нужны минимум 3 файла разных типов с общим словом в названии.">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource EmptyVis}">
+                    <Binding Path="Shell.HasReport"/>
+                    <Binding Path="Items.Count"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Items}" Style="{StaticResource PlainList}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="Сгруппировать (в план)" Style="{StaticResource AccentButton}"
+                                    Command="{Binding DataContext.GroupCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding Reason}" Style="{StaticResource Caption}"/>
+                                <TextBlock Text="{Binding Target}" Style="{StaticResource Caption}"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding Files}" Margin="0,6,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis">
+                                        <Run Text="•"/>
+                                        <Run Text="{Binding Name, Mode=OneWay}"/>
+                                        <Run Text="  →  " Foreground="{DynamicResource TextSecondary}"/>
+                                        <Run Text="{Binding Note, Mode=OneWay}" Foreground="{DynamicResource TextSecondary}"/>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>

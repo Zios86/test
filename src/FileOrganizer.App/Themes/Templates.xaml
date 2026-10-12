@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:conv="clr-namespace:FileOrganizer.App.Converters">
+    <conv:SizeConverter x:Key="TplSize"/>
+    <conv:DateConverter x:Key="TplDate"/>
+    <conv:BoolToVisibilityConverter x:Key="TplBoolToVis"/>
+
+    <!-- Строка файла: флажок, имя, папка, размер, дата, пояснение, «показать» -->
+    <DataTemplate x:Key="FileRowTemplate">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Folder}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Folder}"/>
+                <TextBlock Text="{Binding Note}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
+                           Visibility="{Binding Note, Converter={StaticResource TplBoolToVis}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Margin="12,0,0,0" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Size, Converter={StaticResource TplSize}}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding Modified, Converter={StaticResource TplDate}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Right"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource LinkButton}" Content="открыть"
+                            Command="{Binding DataContext.OpenFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                    <Button Style="{StaticResource LinkButton}" Content="показать в папке" Margin="0"
+                            Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Горизонтальная полоса диаграммы -->
+    <DataTemplate x:Key="BarTemplate">
+        <Grid Margin="0,3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="170"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"/>
+            <ProgressBar Grid.Column="1" Height="12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="12,0,0,0">
+                <Run Text="{Binding Size, Mode=OneWay}" FontWeight="SemiBold"/>
+                <Run Text=" · "/>
+                <Run Text="{Binding Count, Mode=OneWay}"/>
+                <Run Text=" файлов"/>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

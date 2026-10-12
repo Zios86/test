@@ -167,6 +167,15 @@ public sealed class PlanBuilder
         }
     }
 
+    /// <summary>Удаляет действие из плана (например, пользователь изменил решение по группе дубликатов).</summary>
+    public void Remove(PlannedOperation op)
+    {
+        if (!Plan.Operations.Remove(op)) return;
+        if (op.Kind == OperationKind.CreateFolder) { _plannedFolders.Remove(op.Source); return; }
+        _usedSources.Remove(op.Source);
+        if (op.Kind != OperationKind.DeleteEmptyFolder) _plannedDestinations.Remove(op.Destination);
+    }
+
     /// <summary>Убирает «Создать папку», которые больше не нужны ни одному выбранному действию.</summary>
     public void PruneUnusedFolders()
     {

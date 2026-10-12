@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{823EE63F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileOrganizer.Core.Tests", "tests\FileOrganizer.Core.Tests\FileOrganizer.Core.Tests.csproj", "{652BD98C-C468-4F17-B3A9-F31DAD3C06E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileOrganizer.Cli", "src\FileOrganizer.Cli\FileOrganizer.Cli.csproj", "{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileOrganizer.App", "src\FileOrganizer.App\FileOrganizer.App.csproj", "{8957B6BA-B7A2-450F-9F27-588C563E4E06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +32,19 @@ Global
 		{652BD98C-C468-4F17-B3A9-F31DAD3C06E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{652BD98C-C468-4F17-B3A9-F31DAD3C06E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{652BD98C-C468-4F17-B3A9-F31DAD3C06E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8957B6BA-B7A2-450F-9F27-588C563E4E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8957B6BA-B7A2-450F-9F27-588C563E4E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8957B6BA-B7A2-450F-9F27-588C563E4E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8957B6BA-B7A2-450F-9F27-588C563E4E06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{83DF75A1-1335-4EA4-88CD-33FEB33B0621} = {8B810C39-AD53-4B7D-A91B-7339A891E747}
 		{652BD98C-C468-4F17-B3A9-F31DAD3C06E2} = {823EE63F-FC12-4CAD-9613-F0865FF156CA}
+		{FDDBED3B-8CBA-4D1E-9B7F-1EE4E7B4A550} = {8B810C39-AD53-4B7D-A91B-7339A891E747}
+		{8957B6BA-B7A2-450F-9F27-588C563E4E06} = {8B810C39-AD53-4B7D-A91B-7339A891E747}
 	EndGlobalSection
 EndGlobal

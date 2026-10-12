@@ -1,0 +1,25 @@
+<UserControl x:Class="FileOrganizer.App.Views.TempFilesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Временные файлы" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text=".tmp, недокачанные загрузки, старые установщики, архивы, которые уже распакованы, повторные загрузки. Ничего не удаляется автоматически."/>
+            <WrapPanel>
+                <Button Content="Отметить все" Command="{Binding CheckAllCommand}"/>
+                <Button Content="Снять отметки" Command="{Binding UncheckAllCommand}"/>
+                <Button Content="Убрать отмеченные (в папку восстановления)" Command="{Binding AddCommand}" Style="{StaticResource AccentButton}"/>
+                <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="4,0,0,8"/>
+            </WrapPanel>
+        </StackPanel>
+        <TextBlock Style="{StaticResource EmptyState}" Text="Временных и остаточных файлов не найдено.">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource EmptyVis}">
+                    <Binding Path="Shell.HasReport"/>
+                    <Binding Path="Rows.Count"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Rows}" Style="{StaticResource PlainList}" ItemTemplate="{StaticResource FileRowTemplate}"/>
+    </DockPanel>
+</UserControl>

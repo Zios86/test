@@ -191,4 +191,19 @@ public class PlanningTests
         Assert.Contains(b.Plan.Operations, o => o.Destination == t.P("Отчеты/3.txt"));
         Assert.Contains(b.Plan.Operations, o => o.Destination == t.P("Отчеты/sub/4.txt"));
     }
+
+    [Fact]
+    public void Removed_operation_frees_source_for_a_new_decision()
+    {
+        using var t = new TempDir();
+        t.File("a.txt", "same");
+        t.File("b.txt", "same");
+        var g = new DuplicateFinder().Find(t.Scan().Files).Single();
+        var b = new PlanBuilder(t.Path);
+        OperationPlanner.PlanDuplicates(b, g, DuplicateDecision.KeepOldest);
+        foreach (var op in b.Plan.Operations.ToList()) b.Remove(op);
+        Assert.Empty(b.Plan.Operations);
+        OperationPlanner.PlanDuplicates(b, g, DuplicateDecision.MoveCopiesToDuplicatesFolder);
+        Assert.Contains(b.Plan.Operations, o => o.Kind == OperationKind.Move);
+    }
 }

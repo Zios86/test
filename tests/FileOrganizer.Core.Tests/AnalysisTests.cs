@@ -253,6 +253,6 @@ public class NameAnalyzerTests
         using var t = new TempDir();
         t.File("Поездка в Казань/IMG_5678.jpg", "x", new DateTime(2026, 7, 3, 12, 0, 0, DateTimeKind.Utc));
         var f = t.Scan().Files.Single();
-        Assert.Equal("2026-07-03_Поездка_в_Казань.jpg", NameAnalyzer.SuggestName(f));
+        Assert.Equal("2026-07-03_Поездка_в_Казань_5678.jpg", NameAnalyzer.SuggestName(f));
     }
 }

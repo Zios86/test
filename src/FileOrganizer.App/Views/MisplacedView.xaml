@@ -1,0 +1,46 @@
+<UserControl x:Class="FileOrganizer.App.Views.MisplacedView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Возможно лежат не там" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Файлы, которые по типу или названию выбиваются из своей папки. Например, договор в папке с фотографиями отпуска."/>
+            <WrapPanel>
+                <Button Content="Переместить отмеченные (добавить в план)" Command="{Binding AddCommand}" Style="{StaticResource AccentButton}"/>
+            </WrapPanel>
+        </StackPanel>
+        <TextBlock Style="{StaticResource EmptyState}" Text="Файлов, которые выбиваются из своих папок, не найдено.">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource EmptyVis}">
+                    <Binding Path="Shell.HasReport"/>
+                    <Binding Path="Items.Count"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Items}" Style="{StaticResource PlainList}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel>
+                        <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" Margin="0,2,10,0"/>
+                        <StackPanel DockPanel.Dock="Right" Margin="12,0,0,0">
+                            <Border Style="{StaticResource Badge}" Background="{Binding Confidence, Converter={StaticResource ConfidenceBrush}}">
+                                <TextBlock Text="{Binding Confidence, Converter={StaticResource Percent}}" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                            </Border>
+                            <Button Style="{StaticResource LinkButton}" Content="показать" HorizontalAlignment="Right" Margin="0,4,0,0"
+                                    Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap">
+                                <Run Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold"/>
+                                <Run Text="  →  " Foreground="{DynamicResource TextSecondary}"/>
+                                <Run Text="{Binding Suggested, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding Folder}" Style="{StaticResource Caption}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Reason}" Style="{StaticResource Caption}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>

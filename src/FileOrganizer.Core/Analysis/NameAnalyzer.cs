@@ -65,6 +65,9 @@ public static partial class NameAnalyzer
             var parent = Path.GetFileName(f.DirectoryPath);
             core = topic ?? (string.IsNullOrWhiteSpace(parent) ? f.Category.DisplayName() : parent);
             core = Regex.Replace(core.Trim(), @"\s+", "_");
+            // Номер из имени камеры/«123.pdf» сохраняем, чтобы имена файлов из одной папки не совпали.
+            var number = Regex.Match(Regex.Replace(f.NameWithoutExtension, @"\(\d+\)", ""), @"\d{2,}");
+            if (number.Success) core += "_" + number.Value;
         }
         var ext = f.Extension.Length > 0 ? "." + f.Extension : "";
         return PathUtil.SanitizeFileName($"{date}_{core}") + ext;

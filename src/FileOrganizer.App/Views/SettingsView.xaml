@@ -1,0 +1,254 @@
+<UserControl x:Class="FileOrganizer.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:FileOrganizer.App.ViewModels">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Настройки" Style="{StaticResource PageTitle}"/>
+            <WrapPanel>
+                <TextBlock Text="Профиль:" Style="{StaticResource Body}" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                <ComboBox Width="200" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" DisplayMemberPath="Name" Margin="0,0,8,8"/>
+                <TextBox Width="160" Text="{Binding NewProfileName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8" ToolTip="Название нового профиля"/>
+                <Button Content="Создать профиль" Command="{Binding AddProfileCommand}"/>
+                <Button Content="Удалить профиль" Command="{Binding DeleteProfileCommand}"/>
+                <Button Content="Сохранить" Command="{Binding SaveCommand}" Style="{StaticResource AccentButton}" Margin="16,0,8,8"/>
+            </WrapPanel>
+            <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,4" Text="У каждого профиля (Работа, Личные файлы, Фото, Загрузки, Архив…) свои правила и исключения."/>
+        </StackPanel>
+        <TabControl SelectedIndex="{Binding SelectedTab}">
+            <!-- 0 -->
+            <TabItem Header="Общие">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <CheckBox IsChecked="{Binding SimulationMode}" FontWeight="SemiBold" Content="Режим «Только посмотреть»"/>
+                                <TextBlock Style="{StaticResource Caption}" Text="Программа анализирует и предлагает, но вообще не изменяет файловую систему. Включён по умолчанию при первом запуске."/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Что делать с файлами «на удаление»" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6"/>
+                                <ComboBox ItemsSource="{x:Static vm:SettingsViewModel.DeleteModes}" SelectedValue="{Binding DeleteMode}" SelectedValuePath="Value" DisplayMemberPath="Text"/>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" Text="Безвозвратное удаление возможно только отдельной командой «Удалить окончательно» в «Истории» — после предупреждения."/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Оформление" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6"/>
+                                <ComboBox Width="220" HorizontalAlignment="Left" ItemsSource="{x:Static vm:SettingsViewModel.Themes}" SelectedValue="{Binding Theme}" SelectedValuePath="Value" DisplayMemberPath="Text"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Анализ" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6"/>
+                                <CheckBox IsChecked="{Binding TopLevelOnly}"><TextBlock TextWrapping="Wrap" Text="При сортировке трогать только файлы, лежащие прямо в выбранной папке (структура подпапок сохраняется)"/></CheckBox>
+                                <CheckBox IsChecked="{Binding IncludeHidden}" Content="Учитывать скрытые файлы и папки"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Text="«Давно не использовались» — старше, дней:" Style="{StaticResource Body}" VerticalAlignment="Center" Width="330"/>
+                                    <TextBox Width="90" Text="{Binding OldFilesDays}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <TextBlock Text="Очень большой файл — больше, МБ:" Style="{StaticResource Body}" VerticalAlignment="Center" Width="330"/>
+                                    <TextBox Width="90" Text="{Binding LargeFileMb}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <TextBlock Text="Автоматически отмечать предложения с уверенностью от, %:" Style="{StaticResource Body}" VerticalAlignment="Center" Width="330" TextWrapping="Wrap"/>
+                                    <TextBox Width="90" Text="{Binding AutoSelectPercent}"/>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" Text="Предложения с меньшей уверенностью показываются, но не отмечаются — выбор за вами."/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- 1 -->
+            <TabItem Header="Умный анализ и ИИ">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <CheckBox IsChecked="{Binding ContentAnalysisEnabled}" FontWeight="SemiBold" Content="Умный анализ содержимого документов"/>
+                                <TextBlock Style="{StaticResource Caption}" Text="Читает начало текста TXT, DOCX, XLSX, PPTX, ODT, RTF, PDF на этом компьютере, чтобы определить тему, если по имени это непонятно. Текст никуда не сохраняется."/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <CheckBox IsChecked="{Binding AIEnabled}" FontWeight="SemiBold" Content="Использовать ИИ, если обычных правил недостаточно"/>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,8"
+                                           Text="Порядок: 1) простые правила; 2) метаданные; 3) имя файла; 4) содержимое; 5) ИИ. ИИ получает только имя файла и короткий фрагмент текста. По умолчанию — локальная модель Ollama."/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <TextBlock Text="Адрес:" Style="{StaticResource Body}" Width="80" VerticalAlignment="Center"/>
+                                    <TextBox Width="320" Text="{Binding AIEndpoint}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <TextBlock Text="Модель:" Style="{StaticResource Body}" Width="80" VerticalAlignment="Center"/>
+                                    <TextBox Width="320" Text="{Binding AIModel}"/>
+                                </StackPanel>
+                                <CheckBox IsChecked="{Binding AllowRemoteAI}"><TextBlock TextWrapping="Wrap" Text="Разрешить отправку фрагментов во внешний (не локальный) ИИ-сервис"/></CheckBox>
+                                <TextBlock Style="{StaticResource Caption}" Text="Без этой отметки содержимое документов никогда не покидает компьютер."/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- 2 -->
+            <TabItem Header="Правила">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Button Content="Новое правило" Command="{Binding NewRuleCommand}"/>
+                            <Button Content="Примеры" Command="{Binding AddExampleRulesCommand}"/>
+                            <Button Content="Удалить" Command="{Binding DeleteRuleCommand}" Style="{StaticResource DangerButton}"/>
+                        </WrapPanel>
+                        <ListBox ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule}" Style="{StaticResource PlainList}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                        <TextBlock Text="{Binding Target}" Style="{StaticResource Caption}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <Border Style="{StaticResource Card}" DataContext="{Binding SelectedRule}" Margin="0"
+                                Visibility="{Binding Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="Название" Style="{StaticResource Body}" Width="90" VerticalAlignment="Center"/>
+                                    <TextBox Width="300" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <CheckBox IsChecked="{Binding Enabled}" Content="включено" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="приоритет" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="12,0,6,0"/>
+                                    <TextBox Width="50" Text="{Binding Priority}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,6">
+                                    <TextBlock Text="ЕСЛИ выполняются" FontWeight="SemiBold" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <ComboBox Width="200" ItemsSource="{x:Static vm:RuleEditorViewModel.MatchOptions}" SelectedValue="{Binding MatchAll}" SelectedValuePath="Value" DisplayMemberPath="Text"/>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Conditions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                <ComboBox Width="170" ItemsSource="{x:Static vm:ConditionViewModel.FieldOptions}" SelectedValue="{Binding Field}" SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,0,6,0"/>
+                                                <ComboBox Width="170" ItemsSource="{x:Static vm:ConditionViewModel.OperatorOptions}" SelectedValue="{Binding Operator}" SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,0,6,0"/>
+                                                <TextBox Width="200" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+                                                <Button Content="✕" Padding="8,2" Margin="0"
+                                                        Command="{Binding DataContext.RemoveConditionCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Content="+ условие" Command="{Binding AddConditionCommand}" HorizontalAlignment="Left"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,6">
+                                    <TextBlock Text="ТО" FontWeight="SemiBold" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <ComboBox Width="200" ItemsSource="{x:Static vm:RuleEditorViewModel.ActionOptions}" SelectedValue="{Binding Action}" SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,0,8,0"/>
+                                    <TextBox Width="300" Text="{Binding Target, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource Caption}" Text="Папка указывается относительно выбранной папки, например «Документы/Счета». Подстановки: {year}, {month}, {category}, {ext}. Даты: «2024», «2024-05», «17.05.2024»."/>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" Text="Не забудьте нажать «Сохранить» вверху."/>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- 3 -->
+            <TabItem Header="Исключения">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,8"
+                                   Text="«Не анализировать»: папки, типы файлов, отдельные файлы и маски (*.tmp, *.log). Системные каталоги (Windows, Program Files, ProgramData, AppData) исключены всегда."/>
+                        <Button Content="+ исключение" Command="{Binding AddExclusionCommand}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Exclusions}" Style="{StaticResource PlainList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Width="260" ItemsSource="{x:Static vm:ExclusionRow.Kinds}" SelectedValue="{Binding Kind}" SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,0,8,0"/>
+                                    <TextBox Width="360" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                                    <Button Content="Удалить" Margin="0"
+                                            Command="{Binding DataContext.RemoveExclusionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <!-- 4 -->
+            <TabItem Header="Типы файлов">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,12,8" Text="Расширения через запятую. Определяют сортировку по типам."/>
+                        <Button Content="Вернуть стандартные" Command="{Binding ResetCategoriesCommand}"/>
+                    </WrapPanel>
+                    <ListBox ItemsSource="{Binding CategoryRows}" Style="{StaticResource PlainList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <TextBlock Text="{Binding Name}" Width="160" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                    <TextBox Text="{Binding Extensions, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <!-- 5 -->
+            <TabItem Header="Папки «Разобрать»">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,8"
+                                   Text="Загрузки, Рабочий стол, Telegram Desktop, WhatsApp, временные выгрузки. Программа регулярно проверяет их и предлагает разобрать новые файлы (ничего не делая без вас)."/>
+                        <WrapPanel>
+                            <Button Content="+ папка" Command="{Binding AddInboxCommand}"/>
+                            <Button Content="Проверить сейчас" Command="{Binding CheckInboxCommand}"/>
+                        </WrapPanel>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Inbox}" Style="{StaticResource PlainList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="Убрать" Margin="0"
+                                            Command="{Binding DataContext.RemoveInboxCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Path}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                        <TextBlock Text="{Binding LastCheckedText}" Style="{StaticResource Caption}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <!-- 6 -->
+            <TabItem Header="Данные и журнал">
+                <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Данные программы" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding DataFolder}" Style="{StaticResource Caption}" Margin="0,2,0,8"/>
+                            <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,8"
+                                       Text="Локальная база SQLite: настройки, правила, профили, исключения, хеши, история операций, теги. Содержимое документов не хранится. Технический журнал — без содержимого личных документов."/>
+                            <WrapPanel>
+                                <Button Content="Открыть журнал" Command="{Binding OpenLogsCommand}"/>
+                                <Button Content="Очистить кэш хешей" Command="{Binding ClearHashCacheCommand}"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

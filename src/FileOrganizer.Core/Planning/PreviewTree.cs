@@ -17,6 +17,8 @@ public sealed class PreviewNode
     public long Size { get; set; }
     public List<PreviewNode> Children { get; } = new();
     public int FileCount { get; set; }
+    /// <summary>Развёрнут ли узел в дереве (корень и изменённые папки раскрыты сразу).</summary>
+    public bool IsExpanded { get; set; }
 
     public static string MarkName(ChangeMark m) => m switch
     {
@@ -68,13 +70,15 @@ public static class PreviewTreeBuilder
                 node.Mark = ChangeMark.Merge;
             return node;
         }
-        return Build(scan.Root);
+        var root = Build(scan.Root);
+        root.IsExpanded = true;
+        return root;
     }
 
     /// <summary>Будущая структура: исходное дерево с применёнными (виртуально) действиями.</summary>
     public static PreviewNode BuildProposed(ScanResult scan, OperationPlan plan)
     {
-        var root = new PreviewNode { Name = scan.Root.Name, FullPath = scan.RootPath, IsFolder = true };
+        var root = new PreviewNode { Name = scan.Root.Name, FullPath = scan.RootPath, IsFolder = true, IsExpanded = true };
         var index = new Dictionary<string, PreviewNode>(PathUtil.Comparer) { [scan.RootPath] = root };
         var selected = plan.SelectedOperations.ToList();
         var removed = new HashSet<string>(selected.Where(o => o.Kind != OperationKind.CreateFolder).Select(o => o.Source), PathUtil.Comparer);
@@ -91,6 +95,7 @@ public static class PreviewTreeBuilder
                 Name = Path.GetFileName(path), FullPath = path, IsFolder = true,
                 Mark = created.Contains(path) || !Directory.Exists(path) ? ChangeMark.Create : ChangeMark.Keep,
             };
+            n.IsExpanded = n.Mark == ChangeMark.Create;
             parent.Children.Add(n);
             index[path] = n;
             return n;

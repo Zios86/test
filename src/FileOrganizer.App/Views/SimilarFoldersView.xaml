@@ -1,0 +1,45 @@
+<UserControl x:Class="FileOrganizer.App.Views.SimilarFoldersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24,8,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Похожие папки" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="«Отчеты», «Отчёты», «Отчеты новые», «Отчеты2», «Старые отчеты» — их можно объединить. Перед объединением проверяются одинаковые имена файлов."/>
+        </StackPanel>
+        <TextBlock Style="{StaticResource EmptyState}" Text="Похожих папок не найдено.">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource EmptyVis}">
+                    <Binding Path="Shell.HasReport"/>
+                    <Binding Path="Groups.Count"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Groups}" Style="{StaticResource PlainList}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Header}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <ItemsControl ItemsSource="{Binding Folders}" Margin="0,4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Text}" Foreground="{DynamicResource TextPrimary}"/>
+                                        <Button Style="{StaticResource LinkButton}" Content="показать" Margin="10,0,0,0"
+                                                Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding Conflicts}" Style="{StaticResource Caption}" Margin="0,2,0,6"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Объединить в:" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                            <ComboBox Width="360" ItemsSource="{Binding Folders}" SelectedItem="{Binding Target}" DisplayMemberPath="Text" Margin="0,0,8,8"/>
+                            <Button Content="Объединить (в план)" Style="{StaticResource AccentButton}"
+                                    Command="{Binding DataContext.MergeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>
